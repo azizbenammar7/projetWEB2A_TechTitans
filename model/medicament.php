@@ -3,20 +3,29 @@
 class Medicament
 {
     private ?int $id = null;
-    private ?string $nom = null; // Nouvelle colonne "nom"
+    private ?string $nom = null;
     private ?string $typ = null;
     private ?string $lieu = null;
     private ?string $dispon = null;
     private ?string $date_ajout = null;
+    private ?string $piece_jointe = null; // Nouvelle colonne pour la pièce jointe
 
-    public function __construct($id = null, $n, $t, $l, $d, $date_ajout = null)
-    {
+    public function __construct(
+        $id = null,
+        $nom,
+        $typ,
+        $lieu,
+        $dispon,
+        $date_ajout = null,
+        $piece_jointe = null
+    ) {
         $this->id = $id;
-        $this->nom = $n; // Nouvelle colonne "nom"
-        $this->typ = $t;
-        $this->lieu = $l;
-        $this->dispon = $d;
+        $this->nom = $nom;
+        $this->typ = $typ;
+        $this->lieu = $lieu;
+        $this->dispon = $dispon;
         $this->date_ajout = $date_ajout;
+        $this->piece_jointe = $piece_jointe;
     }
 
     public function getId()
@@ -76,6 +85,17 @@ class Medicament
     public function setDateAjout($date_ajout)
     {
         $this->date_ajout = $date_ajout;
+        return $this;
+    }
+
+    public function getPieceJointe()
+    {
+        return $this->piece_jointe;
+    }
+
+    public function setPieceJointe($piece_jointe)
+    {
+        $this->piece_jointe = $piece_jointe;
         return $this;
     }
 }

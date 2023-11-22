@@ -4,6 +4,7 @@ require '../config.php';
 
 class MedicamentController
 {
+
     public function listMedicament()
     {
         $sql = "SELECT * FROM medicament";
@@ -16,7 +17,7 @@ class MedicamentController
         }
     }
 
-    public function deleteMedicament($id)
+    function deleteMedicament($id)
     {
         $sql = "DELETE FROM medicament WHERE id = :id";
         $db = Config::getConnexion();
@@ -30,26 +31,27 @@ class MedicamentController
         }
     }
 
-    public function addMedicament($medicament)
+    function addMedicament($medicament)
     {
-        $sql = "INSERT INTO medicament (typ, lieu, dispon, nom, date_ajout)  
-                VALUES (:typ, :lieu, :dispon, :nom, :date_ajout)";
+        $sql = "INSERT INTO medicament (nom, typ, lieu, dispon, date_ajout, piece_jointe)  
+                VALUES (:nom, :typ, :lieu, :dispon, :date_ajout, :piece_jointe)";
         $db = Config::getConnexion();
         try {
             $query = $db->prepare($sql);
             $query->execute([
+                'nom' => $medicament->getNom(),
                 'typ' => $medicament->getTyp(),
                 'lieu' => $medicament->getLieu(),
                 'dispon' => $medicament->getDispon(),
-                'nom' => $medicament->getNom(),
                 'date_ajout' => $medicament->getDateAjout(),
+                'piece_jointe' => $medicament->getPieceJointe(),
             ]);
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage();
         }
     }
 
-    public function showMedicament($id)
+    function showMedicament($id)
     {
         $sql = "SELECT * from medicament where id = :id";
         $db = Config::getConnexion();
@@ -64,33 +66,58 @@ class MedicamentController
         }
     }
 
-    public function updateMedicament($medicament, $id)
-    {
-        try {
-            $db = Config::getConnexion();
-            $query = $db->prepare(
-                'UPDATE medicament SET 
-                    typ = :typ, 
-                    lieu = :lieu, 
-                    dispon = :dispon,
-                    nom = :nom,
-                    date_ajout = :date_ajout 
-                WHERE id = :id'
-            );
+    function updateMedicament($medicament, $id)
+{
+    try {
+        $db = Config::getConnexion();
 
-            $query->execute([
-                'id' => $id,
-                'typ' => $medicament->getTyp(),
-                'lieu' => $medicament->getLieu(),
-                'dispon' => $medicament->getDispon(),
-                'nom' => $medicament->getNom(),
-                'date_ajout' => $medicament->getDateAjout(),
-            ]);
-
-            // Commentez la ligne suivante si vous ne voulez pas afficher de message de réussite
-            echo $query->rowCount() . " records UPDATED successfully <br>";
-        } catch (PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
+        // Si une nouvelle pièce jointe est fournie, mettez à jour la colonne piece_jointe
+        $updatePieceJointe = '';
+        if ($medicament->getPieceJointe() !== null) {
+            $updatePieceJointe = ', piece_jointe = :piece_jointe';
         }
+
+        $query = $db->prepare(
+            'UPDATE medicament SET 
+                nom = :nom,
+                typ = :typ, 
+                lieu = :lieu, 
+                dispon = :dispon,
+                date_ajout = :date_ajout' . $updatePieceJointe . '
+            WHERE id = :id'
+        );
+
+        $params = [
+            'id' => $id,
+            'nom' => $medicament->getNom(),
+            'typ' => $medicament->getTyp(),
+            'lieu' => $medicament->getLieu(),
+            'dispon' => $medicament->getDispon(),
+            'date_ajout' => $medicament->getDateAjout(),
+        ];
+
+        // Ajoutez la pièce jointe aux paramètres s'il y en a une
+        if ($medicament->getPieceJointe() !== null) {
+            $params['piece_jointe'] = $medicament->getPieceJointe();
+        }
+
+        $query->execute($params);
+
+        echo $query->rowCount() . " records UPDATED successfully <br>";
+    } catch (PDOException $e) {
+        echo 'Error: ' . $e->getMessage();
     }
+}
+// Ajouter cette fonction dans la classe MedicamentController
+public function searchMedicament($searchTerm)
+{
+    $sql = "SELECT * FROM medicament WHERE nom LIKE :searchTerm";
+    $stmt = $this->connexion->prepare($sql);
+    $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%', PDO::PARAM_STR);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
 }
