@@ -1,5 +1,6 @@
 <?php
-class pack
+
+class Pack
 {
     private ?int $IDpack = null;
     private ?string $nompack = null;
@@ -9,8 +10,9 @@ class pack
     private ?int $disponibilite = null;
     private ?string $datedebut = null;
     private ?string $datefin = null;
+    private ?string $image = null;
 
-    public function __construct($IDpack, $nompack, $description, $prix, $type, $disponibilite, $datedebut, $datefin)
+    public function __construct($IDpack, $nompack, $description, $prix, $type, $disponibilite, $datedebut, $datefin, $image)
     {
         $this->IDpack = $IDpack;
         $this->nompack = $nompack;
@@ -20,9 +22,10 @@ class pack
         $this->disponibilite = $disponibilite;
         $this->datedebut = $datedebut;
         $this->datefin = $datefin;
-
+        $this->image = $image;
     }
-// getters
+
+    // getters
     public function getIdPack()
     {
         return $this->IDpack;
@@ -63,7 +66,12 @@ class pack
         return $this->datefin;
     }
 
-// setters
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    // setters
     public function setNomPack($nompack)
     {
         $this->nompack = $nompack;
@@ -103,6 +111,12 @@ class pack
     public function setDateFin($datefin)
     {
         $this->datefin = $datefin;
+        return $this;
+    }
+
+    public function setImage($image)
+    {
+        $this->image = $image;
         return $this;
     }
 }
