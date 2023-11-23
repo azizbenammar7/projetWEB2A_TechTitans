@@ -3,7 +3,7 @@ include '../controller/pubC.php';
 
 
 $pubC = new pubC();
-$publications = $pubC->listPublications();  
+$publications = $pubC->listpublications();  
 
 
 ?>
@@ -35,7 +35,9 @@ $publications = $pubC->listPublications();
         </tr>
 
         <?php 
-        foreach ($publications as $publication) {
+        foreach ($publications as $publication) 
+    {
+            
         ?>
 
 
@@ -51,11 +53,11 @@ $publications = $pubC->listPublications();
                 <td align="center">
                 <form method="POST" action="update_pub.php">
                     <input type="submit" name="update" value="Update">
-                    <input type="hidden" value=<?PHP echo $publication['IDpub']; ?> name="IDpublication">
+                    <input type="hidden" value="<?= $publication['IDpub']; ?>" name="IDpublication">
                 </form>
             </td>
                 <td>
-                    <a href="delete_pub.php?id=<?php echo $publication['IDpub']; ?>">Delete</a>
+                <a href="delete_pub.php?IDpublication=<?= $publication['IDpub']; ?>">Delete</a>
                 </td>
             </tr>
             <?php

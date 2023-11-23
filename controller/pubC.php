@@ -16,21 +16,23 @@ class PubC
         }
     }
 
-    function deletePublication($ide)
+    public function deletePublication($IDpublication)
     {
-        $sql = "DELETE FROM publication WHERE IDpub = :id";
+        $sql = "DELETE FROM publication WHERE IDpub = :IDpub";
         $db = Config::getConnexion();
         $req = $db->prepare($sql);
-        $req->bindValue(':id', $ide);
+        $req->bindValue(':IDpub', $IDpublication);
 
         try {
             $req->execute();
-        } catch (Exception $e) {
+        } catch (Exception $e) 
+        {
             die('Error:' . $e->getMessage());
         }
     }
+    
 
-    function addPublication($publication)
+    public function addPublication($publication)
     {
         $sql = "INSERT INTO publication (nom, prenom, email, role, text_of_pub, date_pub)  
                 VALUES (:nom, :prenom, :email, :role, :text_of_pub, :date_pub)";
@@ -50,9 +52,9 @@ class PubC
         }
     }
 
-    function showPublication($id)
+    public function showPublication($IDpub)
     {
-        $sql = "SELECT * FROM publication WHERE IDpub = $id";
+        $sql = "SELECT * FROM publication WHERE IDpub = $IDpub";
         $db = Config::getConnexion();
         try {
             $query = $db->prepare($sql);
@@ -64,10 +66,14 @@ class PubC
         }
     }
 
-    function updatePublication($publication, $id)
+    
+    public function updatePublication($publication, $IDpub)
     {   
         try {
+
             $db = Config::getConnexion();
+           
+            echo $IDpub;
             $query = $db->prepare(
                 'UPDATE publication SET 
                     nom = :nom, 
@@ -76,11 +82,11 @@ class PubC
                     role = :role,
                     text_of_pub = :text_of_pub,
                     date_pub = :date_pub
-                WHERE IDpub = :idPublication'
+                WHERE IDpub = :IDpub'
             );
             
             $query->execute([
-                'idPublication' => $id,
+                'IDpub' => $IDpub,
                 'nom' => $publication->getNom(),
                 'prenom' => $publication->getPrenom(),
                 'email' => $publication->getEmail(),
@@ -91,7 +97,7 @@ class PubC
             
             echo $query->rowCount() . " records UPDATED successfully <br>";
         } catch (PDOException $e) {
-            $e->getMessage();
+            echo 'error: ' . $e->getMessage();
         }
     }
 }

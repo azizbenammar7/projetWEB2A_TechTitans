@@ -1,17 +1,8 @@
 <?php
+include '../Controller/pubC.php';
 
-include '../Controller/PubC.php';
-
-$pubC = new PubC();
-
-if (isset($_GET['IDpub'])) {
-    $idPublication = $_GET['IDpub'];
-    $pubC->deletePublication($idPublication);
-    
-    header('Location: listpublication.php');
-} else {
-    echo "Invalid publication ID.";
-}
-
+$pubC = new pubC();
+//print_r($_GET);
+$pubC->deletePublication($_GET["IDpublication"]);
+header('Location: listpublication.php');
 ?>
-
