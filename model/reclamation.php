@@ -47,12 +47,12 @@ class Reclamation
         return $this;
     }
 
-    public function getPieceJointe()
+    public function getPieceJointePath()
     {
         return $this->piece_jointe;
     }
 
-    public function setPieceJointe($piece_jointe)
+    public function setPieceJointePath($piece_jointe)
     {
         $this->piece_jointe = $piece_jointe;
         return $this;

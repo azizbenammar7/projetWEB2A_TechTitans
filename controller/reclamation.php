@@ -4,12 +4,18 @@ require '../config.php';
 
 class ReclamationController
 {
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = Config::getConnexion();
+    }
+
     public function listReclamation()
     {
         $sql = "SELECT * FROM reclamation";
-        $db = Config::getConnexion();
         try {
-            $liste = $db->query($sql);
+            $liste = $this->db->query($sql);
             return $liste;
         } catch (Exception $e) {
             die('Error:' . $e->getMessage());
@@ -19,8 +25,7 @@ class ReclamationController
     public function deleteReclamation($id)
     {
         $sql = "DELETE FROM reclamation WHERE id = :id";
-        $db = Config::getConnexion();
-        $req = $db->prepare($sql);
+        $req = $this->db->prepare($sql);
         $req->bindValue(':id', $id, PDO::PARAM_INT);
 
         try {
@@ -32,17 +37,38 @@ class ReclamationController
 
     public function addReclamation($reclamation)
     {
+        $piece_jointe_path = $this->uploadPieceJointe($reclamation);
+
         $sql = "INSERT INTO reclamation (typ, description, piece_jointe, date_ajout, etat)  
                 VALUES (:typ, :description, :piece_jointe, :date_ajout, :etat)";
-        $db = Config::getConnexion();
         try {
-            $query = $db->prepare($sql);
+            $query = $this->db->prepare($sql);
             $query->execute([
                 'typ' => $reclamation->getTyp(),
                 'description' => $reclamation->getDescription(),
-                'piece_jointe' => $reclamation->getPieceJointe(),
+                'piece_jointe' => $reclamation->getPieceJointePath(),
                 'date_ajout' => date('Y-m-d'),
                 'etat' => $reclamation->getEtat(),
+            ]);
+        } catch (Exception $e) {
+            echo 'Error: ' . $e->getMessage();
+        }
+    }
+
+    public function updateReclamation($reclamation, $id)
+    {
+        $piece_jointe_path = $this->uploadPieceJointe($reclamation);
+
+        $sql = "UPDATE reclamation 
+                SET typ = :typ, description = :description, piece_jointe = :piece_jointe 
+                WHERE id = :id";
+        try {
+            $query = $this->db->prepare($sql);
+            $query->execute([
+                'typ' => $reclamation->getTyp(),
+                'description' => $reclamation->getDescription(),
+                'piece_jointe' => $reclamation->getPieceJointePath(),
+                'id' => $id,
             ]);
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage();
@@ -52,9 +78,8 @@ class ReclamationController
     public function showReclamation($id)
     {
         $sql = "SELECT * FROM reclamation WHERE id = :id";
-        $db = Config::getConnexion();
         try {
-            $query = $db->prepare($sql);
+            $query = $this->db->prepare($sql);
             $query->bindValue(':id', $id, PDO::PARAM_INT);
             $query->execute();
             $reclamation = $query->fetch();
@@ -64,32 +89,22 @@ class ReclamationController
         }
     }
 
-    public function updateReclamation($reclamation, $id)
+    private function uploadPieceJointe($reclamation)
     {
-        try {
-            $db = Config::getConnexion();
-            $query = $db->prepare(
-                'UPDATE reclamation SET 
-                    typ = :typ, 
-                    description = :description, 
-                    piece_jointe = :piece_jointe,
-                    date_ajout = :date_ajout,
-                    etat = :etat
-                WHERE id = :id'
-            );
+        $uploadDir = "upload"; // Remplacez par le chemin de votre choix
+        $piece_jointe= null;
 
-            $query->execute([
-                'id' => $id,
-                'typ' => $reclamation->getTyp(),
-                'description' => $reclamation->getDescription(),
-                'piece_jointe' => $reclamation->getPieceJointe(),
-                'date_ajout' => $reclamation->getDateAjout(),
-                'etat' => $reclamation->getEtat(),
-            ]);
+        if (isset($_FILES['piece_jointe']) && $_FILES['piece_jointe']['error'] == UPLOAD_ERR_OK) {
+            $tempName = $_FILES['piece_jointe']['tmp_name'];
+            $fileName = $_FILES['piece_jointe']['name'];
+            $piece_jointe = $fileName;
 
-            echo $query->rowCount() . " records UPDATED successfully <br>";
-        } catch (PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
+            move_uploaded_file($tempName, $uploadDir . '/' . $fileName);
         }
+
+        $reclamation->setPieceJointePath($piece_jointe);
+
+        return $piece_jointe;
     }
 }
+?>
