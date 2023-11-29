@@ -2,19 +2,46 @@
 include "../controller/reclamation.php";
 
 $reclamationController = new ReclamationController();
-$reclamations = $reclamationController->listReclamation();
+
+// Récupérer la valeur du champ de saisie du type
+$searchTyp = isset($_GET['searchTyp']) ? $_GET['searchTyp'] : null;
+
+// Utilisez la fonction listReclamationByType avec le type comme paramètre
+$reclamations = $reclamationController->listReclamationByType($searchTyp);
+
+// Récupérer la valeur du champ de filtre d'état
+$etat = isset($_GET['etat']) ? $_GET['etat'] : null;
+
+if (!is_null($etat)) {
+    // Utilisez la fonction getReclamationsByEtat avec l'état comme paramètre
+    $reclamations = $reclamationController->getReclamationsByEtat($etat);
+} else {
+    // Si l'état n'est pas sélectionné, utilisez la fonction listReclamationByType
+    $reclamations = $reclamationController->listReclamationByType($searchTyp);
+}
+
+// Vérifier si la requête est de type POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupérer la valeur du champ de saisie de la date
+    $dateAjoutFilter = $_POST["dateAjoutFilter"];
+    
+    // Utilisez la fonction filterReclamationByDateAjout avec la date comme paramètre
+    $reclamations = $reclamationController->filterReclamationByDateAjout($dateAjoutFilter);
+    
+}
 ?>
+
 
 <?php include '../view/header.php'; ?>
 
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List of Reclamations</title>
-    <!-- Ajoutez ces styles -->
+    <!-- Ajoutez vos liens vers les fichiers CSS ici -->
     <style>
         body {
             display: flex;
@@ -61,21 +88,43 @@ $reclamations = $reclamationController->listReclamation();
     </style>
 </head>
 
-<!DOCTYPE html>
-<html lang="en">
+<body>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List of Reclamations</title>
-    <!-- Ajoutez vos liens vers les fichiers CSS ici -->
-</head>
+<form action="" method="GET">
+    <label for="searchTyp">Search by Type:</label>
+    <select id="searchTyp" name="searchTyp">
+        <option value="">All</option>
+        <option value="médecin">Médecin</option>
+        <option value="pharmacien">Pharmacien</option>
+        <option value="patient">Patient</option>
+        <option value="médicament">Médicament</option>
+        <option value="autre">Autre</option>
+    </select>
+    <input type="submit" name="typeSubmit" value="Filter by Type">
+</form>
+
+<form method="post" action="">
+    <label for="dateAjoutFilter">Filter by Date:</label>
+        <input type="date" name="dateAjoutFilter">
+        <input type="submit" value="Apply Filter">
+</form>
+<form action="" method="GET">
+    <label for="etat">Filter by Etat:</label>
+    <select id="etat" name="etat">
+        <option value="">All</option>
+        <option value="1">Etat 1</option>
+        <option value="0">Etat 0</option>
+    </select>
+    <input type="submit" name="etatSubmit" value="Filter by Etat">
+</form>
+
 
 <body>
     <header>
         <h1>List of Reclamations</h1>
         <h2><a href="addReclamation.php">Add Reclamation</a></h2>
     </header>
+
 
     <main>
         <table border="1" align="center">

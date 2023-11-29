@@ -122,7 +122,7 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
                         </a>
                     </li>
                     <li>
-                        <a href="addReponse.php">
+                        <a href="backoffice.php">
                             <i class="fa fa-plus-circle fa-3x"></i> Ajouter Reponse
                         </a>
                     </li>
@@ -171,6 +171,15 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
     <title>Update Reponse</title>
 </head>
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Reponse</title>
+</head>
+
 <body>
     <h2>Update Reponse</h2>
 
@@ -184,16 +193,19 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
         <br>
 
         <input type="hidden" name="etat" value="1">
-        <br>
 
-        <label for="reclamation">Réclamation :</label>
-        <input type="number" id="reclamation" name="reclamation" value="<?php echo $selectedReponse['reclamation']; ?>">
+        <!-- Supprimez cette ligne si vous ne mettez pas à jour la réclamation dans ce formulaire -->
+        <input type="hidden" name="reclamation" value="<?php echo $selectedReponse['reclamation']; ?>">
         <br>
 
         <input type="submit" value="Update Reponse">
-        <input type="reset" value="Réinitialiser" >
+        <input type="reset" value="Réinitialiser">
     </form>
 </body>
+
+</html>
+
+
 
 </html>
 <!------------------------------------------------------------------------------------------------------------------->

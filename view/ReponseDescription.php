@@ -2,35 +2,37 @@
 // Inclure les fichiers nécessaires pour les réponses
 include '../model/reponse.php';
 include '../controller/reponse.php';
+include '../controller/reclamation.php';
+
+$error = "";
+$reclamationController = new ReclamationController();
 
 // Vérifier si l'ID de la réclamation est fourni dans l'URL
 if (isset($_GET['id'])) {
-    $idReclamation = $_GET['id'];
+    $reclamation = $_GET['id'];
 
-    // Récupérer les informations de la réponse associée à la réclamation
-    $reponseController = new ReponseController();
-    $selectedReponses = $reponseController->getReponsesByReclamation($idReclamation);
+    try {
+        // Récupérer les informations de la réponse associée à la réclamation
+        $reponseController = new ReponseController();
+        $selectedReponses = $reponseController->getReponsesByReclamation($reclamation);
 
-    // Vérifier si la réponse existe et afficher la description
-    /*if (!empty($selectedReponses)) {
-        echo '<h2>Réponses associées à la Réclamation</h2>';
+        // Mettre à jour l'état de la réclamation en fonction du nombre de réponses
+        $nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
 
-        foreach ($selectedReponses as $selectedReponse) {
-            echo '<p><strong>Description :</strong> ' . $selectedReponse['description'] . '</p>';
-            // Ajoutez d'autres détails de la réponse ici
-        }
-    } else {
-        echo '<p style="color: red;">Aucune réponse trouvée pour cette réclamation.</p>';
-    }*/
+        // Afficher la nouvelle valeur de l'état
+        echo "Nouvel état : " . $nouvelEtat;
 
-    // Reste du code pour afficher les détails de la réponse
-    // ...
-} else {
-    // Redirection si l'ID de la réclamation n'est pas fourni
-    header('Location: listReclamation.php');
-    exit();
+        // Mise à jour de l'état de la réclamation
+
+    } catch (Exception $e) {
+        // Gérer les erreurs
+        echo "Erreur : " . $e->getMessage();
+    }
+
+    // ... autres codes ...
 }
 ?>
+
 
 <?php include '../view/header.php'; ?>
 

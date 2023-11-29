@@ -1,35 +1,40 @@
 <?php
-
 // Inclure les fichiers nécessaires
 include '../model/reponse.php';
 include '../controller/reponse.php';
+include '../controller/reclamation.php';
 
-// Initialiser les variables
 $error = "";
-$reponseController = new ReponseController();
+$reclamationController = new ReclamationController();
 
-// Vérifier si le formulaire a été soumis
+// Récupérer l'ID de la réclamation depuis l'URL
+$reclamation = $_GET['id'] ?? null;
+
+// Vérifier si le formulaire a été soumis et si l'ID de la réclamation est présent
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Récupérer les valeurs du formulaire
+    // Votre logique de traitement ici
     $description = $_POST['description'];
     $etat = $_POST['etat'];
-    $reclamation = $_POST['reclamation'];
+    $reclamation = $_POST['id'];
 
     // Vérifier si tous les champs sont remplis
-    if (empty($description) || empty($reclamation)) {
+    if (empty($description)) {
         $error = "Veuillez remplir tous les champs.";
     } else {
-        // Si tous les champs sont remplis, procédez à la création de l'instance de Reponse
-        // et à l'ajout à la base de données
-        $reponse = new Reponse(
-            $description,
-            (int)$etat,
-            (int)$reclamation
-        );
-
         try {
+            // Créer une instance de Reponse
+            $reponse = new Reponse(
+                $description,
+                (int)$etat,
+                (int)$reclamation
+            );
+
             // Ajouter la réponse à la base de données
+            $reponseController = new ReponseController(); // Ajout de cette ligne
             $reponseController->addReponse($reponse);
+
+            // Mettre à jour l'état de la réclamation en fonction du nombre de réponses
+            $nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
 
             // Redirection après l'ajout de la réponse
             header('Location: listreponse.php');
@@ -40,7 +45,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
+// Mettre à jour l'état de la réclamation en fonction du nombre de réponses
+$nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
+
+// Afficher la nouvelle valeur de l'état
+echo "Nouvel état : " . $nouvelEtat;
+
+// Initialiser les variables
+$reponseController = new ReponseController(); // Ajout de cette ligne
+$selectedReponses = $reponseController->getReponsesByReclamation($reclamation);
 ?>
+
 
 
 
@@ -144,22 +160,27 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
         <p style="color: red;"><?php echo $error; ?></p>
     <?php endif; ?>
 
-    <form action="addreponse.php" method="POST">
+    <form action="addReponse.php" method="POST">
         <label for="description">Description :</label>
         <textarea id="description" name="description" rows="4" cols="50"></textarea>
         <br>
 
         <input type="hidden" name="etat" value="1">
-        <br>
 
-        <label for="reclamation">Réclamation :</label>
-        <input type="number" id="reclamation" name="reclamation">
-        <br>
+
+        <input type="hidden" name="id" value="<?= $reclamation; ?>">
 
         <input type="submit" value="Ajouter la Réponse">
-        <input type="reset" value="Réinitialiser" >
+        <input type="reset" value="Réinitialiser">
     </form>
+
+    <?php
+    // Ajoutez ces lignes pour déboguer les variables
+    //echo "Reclamation: ";
+    //var_dump($reclamation);
+    ?>
 </body>
+
 
 </html>
 

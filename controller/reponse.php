@@ -1,6 +1,6 @@
 <?php
 
-require '../config.php';
+require_once '../config.php';
 
 class ReponseController
 {
@@ -110,5 +110,16 @@ public function deleteReponse($idReponse)
             throw new Exception('Erreur lors de la récupération des réponses: ' . $e->getMessage());
         }
     }
+
+   
+
+    
+
+
+
+
+
+
+
 }
 ?>

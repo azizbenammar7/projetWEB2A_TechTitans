@@ -3,6 +3,7 @@ include "../controller/reclamation.php";
 
 $reclamationController = new ReclamationController();
 $reclamations = $reclamationController->listReclamation();
+
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +110,7 @@ $reclamations = $reclamationController->listReclamation();
                         </a>
                     </li>
                     <li>
-                        <a href="addReponse.php">
+                        <a href="backoffice.php">
                             <i class="fa fa-plus-circle fa-3x"></i> Ajouter Reponse
                         </a>
                     </li>
@@ -149,42 +150,47 @@ $reclamations = $reclamationController->listReclamation();
                     <div class="col-md-12">
                         <!-- TABLE -->
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Reclamations Table
-                            </div>
-                            <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Id Reclamation</th>
-                                                <th>Type</th>
-                                                <th>Description</th>
-                                                <th>Piece Jointe</th>
-                                                <th>Date d'Ajout</th>
-                                                <th>Etat</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($reclamations as $reclamation) { ?>
-                                                <tr>
-                                                    <td><?= $reclamation['id']; ?></td>
-                                                    <td><?= $reclamation['typ']; ?></td>
-                                                    <td><?= $reclamation['description']; ?></td>
-                                                    <td>
-                                                        <a href="../view/download.php?filename=<?= rawurlencode($reclamation['piece_jointe']); ?>" download="<?= $reclamation['piece_jointe']; ?>">
-                                                            <?= $reclamation['piece_jointe']; ?>
-                                                        </a>
-                                                    </td>
-                                                    <td><?= $reclamation['date_ajout']; ?></td>
-                                                    <td><?= $reclamation['etat']; ?></td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+    <div class="panel-heading">
+        Reclamations Table
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Id Reclamation</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Piece Jointe</th>
+                        <th>Date d'Ajout</th>
+                        <th>Etat</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($reclamations as $reclamation) { ?>
+                        <tr>
+                            <td><?= $reclamation['id']; ?></td>
+                            <td><?= $reclamation['typ']; ?></td>
+                            <td><?= $reclamation['description']; ?></td>
+                            <td>
+                                <a href="../view/download.php?filename=<?= rawurlencode($reclamation['piece_jointe']); ?>" download="<?= $reclamation['piece_jointe']; ?>">
+                                    <?= $reclamation['piece_jointe']; ?>
+                                </a>
+                            </td>
+                            <td><?= $reclamation['date_ajout']; ?></td>
+                            <td><?= $reclamation['etat']; ?></td>
+                            <td>
+                            <a href="addReponse.php?id=<?= $reclamation['id']; ?>" class="btn btn-primary mt-2">Ajouter une réponse</a>
+
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
                         <!-- END TABLE -->
                     </div>
                 </div>

@@ -42,7 +42,7 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
                         </a>
                     </li>
                     <li>
-                        <a href="addReponse.php">
+                        <a href="backoffice.php">
                             <i class="fa fa-plus-circle fa-3x"></i> Ajouter Reponse
                         </a>
                     </li>
@@ -154,7 +154,7 @@ $reponses = $reponseController->listReponse();
 <body>
     <header>
         <h1>List of Reponses</h1>
-        <h2><a href="addReponse.php">Add Reponse</a></h2>
+        
     </header>
 
     <main>
