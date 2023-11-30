@@ -1,13 +1,20 @@
 <?php
 
-require '../config.php';
+require_once '../config.php';
 
 class MedicamentController
 {
+    private $connexion;
+
+    public function __construct()
+    {
+        $this->connexion = Config::getConnexion();
+    }
 
     public function listMedicament()
     {
-        $sql = "SELECT * FROM medicament";
+        $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+                LEFT JOIN type t ON m.typ = t.id";
         $db = Config::getConnexion();
         try {
             $liste = $db->query($sql);
@@ -17,7 +24,36 @@ class MedicamentController
         }
     }
 
-    function deleteMedicament($id)
+    public function searchMedicamentByName($searchTerm)
+    {
+        $sql = "SELECT * FROM medicament WHERE nom LIKE :searchTerm";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%', PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    // Dans MedicamentController.php
+ // Dans MedicamentController.php
+
+ public function filterMedicamentByType($type)
+ {
+     $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+             LEFT JOIN type t ON m.typ = t.id
+             WHERE t.typ = :type";
+ 
+     $stmt = $this->connexion->prepare($sql);
+     $stmt->bindValue(':type', $type, PDO::PARAM_STR);
+     $stmt->execute();
+ 
+     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+ }
+ 
+
+
+
+
+
+    public function deleteMedicament($id)
     {
         $sql = "DELETE FROM medicament WHERE id = :id";
         $db = Config::getConnexion();
@@ -31,7 +67,7 @@ class MedicamentController
         }
     }
 
-    function addMedicament($medicament)
+    public function addMedicament($medicament)
     {
         $sql = "INSERT INTO medicament (nom, typ, lieu, dispon, date_ajout, piece_jointe)  
                 VALUES (:nom, :typ, :lieu, :dispon, :date_ajout, :piece_jointe)";
@@ -51,9 +87,9 @@ class MedicamentController
         }
     }
 
-    function showMedicament($id)
+    public function showMedicament($id)
     {
-        $sql = "SELECT * from medicament where id = :id";
+        $sql = "SELECT * FROM medicament WHERE id = :id";
         $db = Config::getConnexion();
         try {
             $query = $db->prepare($sql);
@@ -66,58 +102,102 @@ class MedicamentController
         }
     }
 
-    function updateMedicament($medicament, $id)
-{
-    try {
-        $db = Config::getConnexion();
+    public function updateMedicament($medicament, $id)
+    {
+        try {
+            $db = Config::getConnexion();
 
-        // Si une nouvelle pièce jointe est fournie, mettez à jour la colonne piece_jointe
-        $updatePieceJointe = '';
-        if ($medicament->getPieceJointe() !== null) {
-            $updatePieceJointe = ', piece_jointe = :piece_jointe';
+            // Si une nouvelle pièce jointe est fournie, mettez à jour la colonne piece_jointe
+            $updatePieceJointe = '';
+            if ($medicament->getPieceJointe() !== null) {
+                $updatePieceJointe = ', piece_jointe = :piece_jointe';
+            }
+
+            $query = $db->prepare(
+                'UPDATE medicament SET 
+                    nom = :nom,
+                    typ = :typ, 
+                    lieu = :lieu, 
+                    dispon = :dispon,
+                    date_ajout = :date_ajout' . $updatePieceJointe . '
+                WHERE id = :id'
+            );
+
+            $params = [
+                'id' => $id,
+                'nom' => $medicament->getNom(),
+                'typ' => $medicament->getTyp(),
+                'lieu' => $medicament->getLieu(),
+                'dispon' => $medicament->getDispon(),
+                'date_ajout' => $medicament->getDateAjout(),
+            ];
+
+            // Ajoutez la pièce jointe aux paramètres s'il y en a une
+            if ($medicament->getPieceJointe() !== null) {
+                $params['piece_jointe'] = $medicament->getPieceJointe();
+            }
+
+            $query->execute($params);
+
+            echo $query->rowCount() . " records UPDATED successfully <br>";
+        } catch (PDOException $e) {
+            echo 'Error: ' . $e->getMessage();
         }
-
-        $query = $db->prepare(
-            'UPDATE medicament SET 
-                nom = :nom,
-                typ = :typ, 
-                lieu = :lieu, 
-                dispon = :dispon,
-                date_ajout = :date_ajout' . $updatePieceJointe . '
-            WHERE id = :id'
-        );
-
-        $params = [
-            'id' => $id,
-            'nom' => $medicament->getNom(),
-            'typ' => $medicament->getTyp(),
-            'lieu' => $medicament->getLieu(),
-            'dispon' => $medicament->getDispon(),
-            'date_ajout' => $medicament->getDateAjout(),
-        ];
-
-        // Ajoutez la pièce jointe aux paramètres s'il y en a une
-        if ($medicament->getPieceJointe() !== null) {
-            $params['piece_jointe'] = $medicament->getPieceJointe();
-        }
-
-        $query->execute($params);
-
-        echo $query->rowCount() . " records UPDATED successfully <br>";
-    } catch (PDOException $e) {
-        echo 'Error: ' . $e->getMessage();
     }
-}
-// Ajouter cette fonction dans la classe MedicamentController
-public function searchMedicament($searchTerm)
+
+    public function searchMedicament($searchTerm)
+    {
+        $sql = "SELECT * FROM medicament WHERE nom LIKE :searchTerm";
+        $stmt = $this->connexion->prepare($sql);
+        $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%', PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function filterMedicamentByDateAjout($date_ajout)
 {
-    $sql = "SELECT * FROM medicament WHERE nom LIKE :searchTerm";
+    // Modifiez la requête SQL en fonction de vos besoins
+    // Dans cet exemple, on suppose que vous voulez les médicaments ajoutés à une date spécifique.
+    $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+    LEFT JOIN type t ON m.typ = t.id
+    WHERE m.date_ajout = :date_ajout";
+
+
+    // Utilisation d'un objet DateTime pour la sécurité
+    $dateTime = new DateTime($date_ajout);
+    $formattedDate = $dateTime->format('Y-m-d');
+
     $stmt = $this->connexion->prepare($sql);
-    $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%', PDO::PARAM_STR);
+    $stmt->bindValue(':date_ajout', $formattedDate, PDO::PARAM_STR);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+public function filterMedicamentByDisponibilite($disponibilite)
+{
+    $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+    LEFT JOIN type t ON m.typ = t.id WHERE dispon = :disponibilite";
+
+    $stmt = $this->connexion->prepare($sql);
+    $stmt->bindValue(':disponibilite', $disponibilite, PDO::PARAM_STR);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+// Dans MedicamentController.php
+public function filterMedicamentByLieu($lieu)
+{
+    $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+    LEFT JOIN type t ON m.typ = t.id WHERE lieu = :lieu";
+
+    $stmt = $this->connexion->prepare($sql);
+    $stmt->bindValue(':lieu', $lieu, PDO::PARAM_STR);
     $stmt->execute();
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 
+
+    
 }
