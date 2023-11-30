@@ -123,6 +123,30 @@
 include '../controller/PackC.php';
 $packC = new PackC(); 
 $list = $packC->listPacks();
+
+// Vérifier si le formulaire a été soumis
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nompack = $_POST['nompack'] ?? null;
+
+    // Filtrez la liste des packs en fonction du nom
+    $list = $packC->filterPacksByName($nompack);
+} else {
+    // Si le formulaire n'est pas soumis, affichez tous les packs
+    $list = $packC->listPacks();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Vérifier si le formulaire a été soumis
+    $prixMax = $_POST['prixMax'] ?? null;
+
+    // Filtrez la liste des packs en fonction du critère de recherche par prix
+    $list = $packC->filterPacksByPrice($prixMax);
+} else {
+    // Si le formulaire n'est pas soumis, affichez tous les packs
+    $list = $packC->listPacks();
+}
+
+
 ?>
 <html>
 <body>
@@ -135,9 +159,29 @@ $list = $packC->listPacks();
         <!-- Modifiez le lien pour ajouter un pack -->
     </h2>
 
+ <!-- Formulaire de recherche par nom -->
+ <form method="post" class="text-center mt-3">
+        <label for="nompack">Search by name:</label>
+        <input type="text" name="nompack" id="nompack">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Formulaire de filtre par prix -->
+    <form method="post" action="" class="text-center mt-3">
+        <label for="prixMax">Filter by Price (Max): </label>
+        <input type="text" name="prixMax">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+
     <!-- Liste des packs -->
     <div class="row g-4 d-flex justify-content-center">
-        <?php foreach ($list as $pack) { ?>
+        <?php foreach ($list as $pack) {
+            // Obtenez la moyenne de note pour ce pack
+        $averageRating = $packC->getAverageRating($pack['IDpack']); 
+            ?>
+            
+            
             <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                 <div class="team-item position-relative rounded overflow-hidden">
 
@@ -145,12 +189,13 @@ $list = $packC->listPacks();
                     <div class="overflow-hidden">
                         <!-- Bloc de texte du pack -->
                         <div class="team-text bg-light text-center p-4">
-                        <h5 class="team-name">
-                                <?php echo $pack['description']; ?>   
-                        </h5>
-                        <h5 class="team-name ">
-                                <?php echo  $pack['date_fin']; ?>   
-                        </h5>
+                        <!-- Bouton pour ajouter un avis -->
+                        <a href="addAvis.php?idPack=<?php echo $pack['IDpack']; ?>" class="btn btn-primary mt-2">Ajouter un avis</a>
+                        <a href="avisparpack.php?idPack=<?php echo $pack['IDpack']; ?>" class="btn btn-primary mt-2">Voir les avis</a>
+ <!-- Afficher "Top Rated" si la moyenne de note est élevée -->
+ <?php if ($averageRating >= 4.5) { ?>
+                        <p class="text-success">Top Rated</p>
+                    <?php } ?>
                         </div>
 
                         <!-- Afficher l'image du pack -->
@@ -166,9 +211,7 @@ $list = $packC->listPacks();
                                     <i class="fas fa-info-circle ml-2" style="cursor: pointer;"></i>
                                 </span>
                             </h5>
-                        <!-- Bouton pour ajouter un avis -->
-<a href="addAvis.php?idPack=<?php echo $pack['IDpack']; ?>" class="btn btn-primary mt-2">Ajouter un avis</a>
-<a href="avisparpack.php?idPack=<?php echo $pack['IDpack']; ?>" class="btn btn-primary mt-2">Voir les avis</a>
+                        
 
 
                         <!-- Afficher le type et le prix dans la même ligne -->

@@ -4,6 +4,13 @@ require '../config.php';
 
 class PackC
 {
+    private $connexion;
+
+    public function __construct()
+    {
+        $this->connexion = Config::getConnexion();
+    }
+
     public function listPacks()
     {
         $sql = "SELECT * FROM pack"; // Utilisez le nom de votre table pour les packs
@@ -100,7 +107,57 @@ class PackC
             echo 'Error: ' . $e->getMessage();
         }
     }
+    public function filterPacksByName($nompack)
+    {
+        // Construction de la requête SQL
+        $sql = "SELECT * FROM pack WHERE nompack LIKE :nompack";
+    
+        // Préparation de la requête
+        $stmt = $this->connexion->prepare($sql);
 
+    
+        // Liaison du paramètre
+        $nompackParam = "%$nompack%"; // Utilisation du joker % pour correspondre à n'importe quelle partie du nom
+        $stmt->bindParam(':nompack', $nompackParam, PDO::PARAM_STR);
+    
+        // Exécution de la requête
+        $stmt->execute();
+    
+        // Récupération des résultats
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function filterPacksByPrice($prixMax)
+    {
+    // Construction de la requête SQL
+    $sql = "SELECT * FROM pack WHERE prix <= :prixMax";
+
+    // Préparation de la requête
+    $stmt = $this->connexion->prepare($sql);
+
+    // Liaison du paramètre de prix
+    $stmt->bindParam(':prixMax', $prixMax, PDO::PARAM_INT);
+
+    // Exécution de la requête
+    $stmt->execute();
+
+    // Récupération des résultats
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
+    public function getAverageRating($idPack)
+    {
+        try {
+            $pdo = Config::getConnexion();
+            $query = $pdo->prepare("SELECT AVG(note) AS avg_rating FROM avis WHERE pack = :idPack");
+            $query->execute(['idPack' => $idPack]);
+            $result = $query->fetch();
+            return $result['avg_rating'] ?: 0;
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
     
 }
 

@@ -154,6 +154,27 @@ if ($idPack !== null) {
 
     </body>
     </html>
+    <?php
+if (!empty($avisParPack)) {
+    // Calculer le nombre d'avis
+    $nombreAvis = count($avisParPack);
+
+    // Calculer la moyenne de la note
+    $sommeNotes = 0;
+    foreach ($avisParPack as $avis) {
+        $sommeNotes += $avis['note'];
+    }
+
+    $moyenneNote = $nombreAvis > 0 ? round($sommeNotes / $nombreAvis, 2) : 0;
+
+    // Afficher le nombre d'avis et la moyenne de la note
+    echo "<p>Nombre d'avis : $nombreAvis</p>";
+    echo "<p>Moyenne de la note : $moyenneNote</p>";
+} else {
+    echo "Aucun avis pour ce pack.";
+}
+?>
+
 
 <?php
 } else {
