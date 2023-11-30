@@ -35,12 +35,12 @@ $commentaires = $commentaireC->listCommentaires();
                 <td><?= $commentaire['publication']; ?></td>
                 <td align="center">
                     <form method="POST" action="updatecommentaire.php">
-                        <input type="submit" name="update" value="Update">
+                        <input class="update-button" type="submit" name="update" value="Update">
                         <input type="hidden" value="<?= $commentaire['IDcommentaire']; ?>" name="IDcommentaire">
                     </form>
                 </td>
                 <td>
-                    <a href="deletecommentaire.php?IDcommentaire=<?= $commentaire['IDcommentaire']; ?>">Delete</a>
+                    <a class="delete-button" href="deletecommentaire.php?IDcommentaire=<?= $commentaire['IDcommentaire']; ?>">Delete</a>
                 </td>
             </tr>
         <?php
@@ -50,3 +50,65 @@ $commentaires = $commentaireC->listCommentaires();
 </body>
 
 </html>
+
+
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 70%;
+    margin: 20px auto;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #4caf50;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+.delete-button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.update-button {
+    background-color: #2ecc71;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>

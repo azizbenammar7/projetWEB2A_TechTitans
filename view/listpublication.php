@@ -39,9 +39,6 @@ $publications = $pubC->listpublications();
     {
             
         ?>
-
-
-
             <tr>
                 <td><?= $publication['IDpub']; ?></td>
                 <td><?= $publication['nom']; ?></td>
@@ -52,12 +49,12 @@ $publications = $pubC->listpublications();
                 <td><?= $publication['date_pub']; ?></td>
                 <td align="center">
                 <form method="POST" action="update_pub.php">
-                    <input type="submit" name="update" value="Update">
+                    <input class="update-button" type="submit" name="update" value="Update">
                     <input type="hidden" value="<?= $publication['IDpub']; ?>" name="IDpublication">
                 </form>
             </td>
                 <td>
-                <a href="delete_pub.php?IDpublication=<?= $publication['IDpub']; ?>">Delete</a>
+                <a class="delete-button"  href="delete_pub.php?IDpublication=<?= $publication['IDpub']; ?>">Delete</a>
                 </td>
             </tr>
             <?php
@@ -68,3 +65,64 @@ $publications = $pubC->listpublications();
 </body>
 
 </html>
+
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 70%;
+    margin: 20px auto;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #4caf50;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+.delete-button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.update-button {
+    background-color: #2ecc71;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>

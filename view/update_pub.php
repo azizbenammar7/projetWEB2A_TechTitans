@@ -61,6 +61,7 @@ if (
 
 <body>
     <button><a href="listpublication.php">Back to list</a></button>
+    
     <hr>
 
     <div id="error">
@@ -69,6 +70,7 @@ if (
 
     <?php
     if (isset($_POST['IDpublication'])) {
+        
         $publication = $pubC->showPublication($_POST['IDpublication']);
     ?>
 
@@ -147,3 +149,84 @@ if (
 </body>
 
 </html>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button a {
+    color: #fff;
+    text-decoration: none;
+}
+
+hr {
+    margin-top: 20px;
+}
+
+#error {
+    color: red;
+    margin-bottom: 20px;
+}
+
+form {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+}
+
+td {
+    padding: 10px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 100px;
+}
+
+input[type="submit"],
+input[type="reset"] {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+input[type="submit"]:hover,
+input[type="reset"]:hover {
+    background-color: #45a049;
+}
+</style>

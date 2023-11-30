@@ -6,24 +6,24 @@ class Commentaire
     private ?string $text_of_commentaire = null;
     private ?int $publication = null;
 
-    public function __construct(?int $IDcommentaire = null, string $text_of_commentaire = null, ?int $publication = null)
+    public function __construct(?int $IDcommentaire = null, ?string $text_of_commentaire = null, ?int $publication = null) // Change this line
     {
         $this->IDcommentaire = $IDcommentaire;
         $this->text_of_commentaire = $text_of_commentaire;
         $this->publication = $publication;
     }
 
-    public function getIDcommentaire()
+    public function getIDcommentaire(): ?int
     {
         return $this->IDcommentaire;
     }
 
-    public function getTextOfCommentaire()
+    public function getTextOfCommentaire(): ?string
     {
         return $this->text_of_commentaire;
     }
 
-    public function getPublicationId()
+    public function getPublication() : ?int
     {
         return $this->publication;
     }
@@ -34,16 +34,16 @@ class Commentaire
         return $this;
     }
 
-    public function setTextOfCommentaire(string $text_of_commentaire)
+    public function setTextOfCommentaire(string $text_of_commentaire) : void
     {
         $this->text_of_commentaire = $text_of_commentaire;
-        return $this;
+        
     }
 
-    public function setPublicationId(?int $publication)
+    public function setPublication(?int $publication): void
     {
         $this->publication = $publication;
-        return $this;
+        
     }
 }
 ?>

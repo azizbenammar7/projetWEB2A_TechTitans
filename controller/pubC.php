@@ -10,6 +10,7 @@ class PubC
         $db = Config::getConnexion(); 
         try {
             $liste = $db->query($sql);
+            //$liste = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             return $liste;
         } catch (Exception $e) {
             die('Error:' . $e->getMessage());

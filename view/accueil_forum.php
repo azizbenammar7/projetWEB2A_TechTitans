@@ -1,3 +1,12 @@
+<?php
+include '../controller/pubC.php';
+
+
+$pubC = new pubC();
+$publications = $pubC->listpublications();  
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -138,11 +147,11 @@
               >Forum</a
             >
             <div class="dropdown-menu rounded-0 rounded-bottom m-0">
-              <a href="forum.html" class="dropdown-item "
+              <a href="addpublication.php" class="dropdown-item "
                 >Créer une publication</a
               >
               <a href="mes_pubs.html" class="dropdown-item">Mes publications</a>
-              <a href="accueil_forum.html" class="dropdown-item active">accueil forum</a>
+              <a href="accueil_forum.php" class="dropdown-item active">accueil forum</a>
             </div>
           </div>
           <div class="nav-item dropdown">
@@ -199,71 +208,122 @@
         </nav>
       </div>
     </div>
+    <div class="search-bar">
+    <form method="GET">
+        
+        <input type="text" id="search" name="search" placeholder="Enter text...">
+        <input type="submit" value="Search">
+    </form>
+</div>
     <!-- Page Header End -->
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    .search-bar {
+  margin-bottom: 20px;
+}
+
+.search-bar form {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar label {
+  margin-right: 10px;
+}
+
+.search-bar input[type="text"] {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.search-bar input[type="submit"] {
+  padding: 8px 12px;
+  background-color: #4caf50; /* Green */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-bar input[type="submit"]:hover {
+  background-color: #45a049;
+}
+</style>
+
+
   </body>
 </html>
 
 <!-- Accueil Start -->
 <div class="acceuil">
-  <div class="topic-container">
-    <!-- Original thread -->
-    <div class="head">
-      <div class="authors">Author</div>
-      <div class="content">Posts</div>
-    </div>
+  <div class="container">
 
-    <div class="body">
-      <div class="authors">
-        <div>Anonymous</div>
-      </div>
-      <div class="content">
-        Just a random content of a random topic.
-        <br>To see how it looks like.
-        <br><br>
-        Nothing more and nothing less.
-        <br>
-        <br>
-        <div class="comment">
-          <button onclick="showComment()">Comment</button>
-        </div>
-      </div>
-    </div>
+      <!-- Loop through publications and display them -->
+      <?php foreach ($publications as $publication) : ?>
+        <?php
+    // Filter publications based on search criteria
+    if (isset($_GET['search']) && $_GET['search'] != '' && stripos($publication['text_of_pub'], $_GET['search']) === false) {
+        continue; // Skip this publication if it doesn't match the search criteria
+    }
+    ?>
+        <div class="acceuil">
+  <div class="container">
+<div class="row">
+<div class="col-md-8">
+<div class="media g-mb-30 media-comment">
+<img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description">
+<div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
+<div class="g-mb-15">
+<h5 class="h5 g-color-gray-dark-v1 mb-0"><?php echo $publication['nom'] . ' ' . $publication['prenom']; ?></h5>
+<span class="g-color-gray-dark-v4 g-font-size-12"><?php echo $publication['date_pub']; ?></span>
+</div>
+<p><?php echo $publication['text_of_pub']; ?></p>
+<ul class="list-inline d-sm-flex my-0">
+<li class="list-inline-item g-mr-20">
+<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
+<i class="fa fa-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
+178
+</a>
+</li>
+<li class="list-inline-item g-mr-20">
+<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
+<i class="fa fa-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
+34
+</a>
+</li>
+<li class="list-inline-item ml-auto">
+<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
+<i class="fa fa-reply g-pos-rel g-top-1 g-mr-3"></i>
+comment
+    </a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+          
+
+
+      <?php endforeach; ?>
   </div>
 
   <!-- Comment Area -->
   <div class="comment-area hide" id="comment-area">
-    <textarea name="comment" id="" placeholder="comment here ... "></textarea>
-    <input type="submit" value="submit">
+      <textarea name="comment" id="" placeholder="comment here ... "></textarea>
+      <input type="submit" value="submit">
   </div>
 
   <!-- Comments Section -->
-  <div class="comments-container">
-    <div class="body">
-      <div class="authors">
-        <div>Anonymous</div>
-      </div>
-      <div class="content">
-        Just a comment of the above random topic.
-        <br>To see how it looks like.
-        <br><br>
-        Nothing more and nothing less.
-        <br>
-        <br>
-        <div class="comment">
-          <button onclick="showReply()">Reply</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Reply Area -->
   <div class="comment-area hide" id="reply-area">
-    <textarea name="reply" id="" placeholder="reply here ... "></textarea>
-    <input type="submit" value="submit">
+      <textarea name="reply" id="" placeholder="reply here ... "></textarea>
+      <input type="submit" value="submit">
   </div>
 </div>
 <!-- Accueil End -->
-
 
 
   <!-- Footer Start -->
@@ -388,3 +448,55 @@ function showReply(){
 </script>
 </body>
 </html>
+
+<style type="text/css">
+    	body{
+    margin-top:20px;
+    background:#eee;
+}
+@media (min-width: 0) {
+    .g-mr-15 {
+        margin-right: 1.07143rem !important;
+    }
+}
+@media (min-width: 0){
+    .g-mt-3 {
+        margin-top: 0.21429rem !important;
+    }
+}
+
+.g-height-50 {
+    height: 50px;
+}
+
+.g-width-50 {
+    width: 50px !important;
+}
+
+@media (min-width: 0){
+    .g-pa-30 {
+        padding: 2.14286rem !important;
+    }
+}
+
+.g-bg-secondary {
+    background-color: #fafafa !important;
+}
+
+.u-shadow-v18 {
+    box-shadow: 0 5px 10px -6px rgba(0, 0, 0, 0.15);
+}
+
+.g-color-gray-dark-v4 {
+    color: #777 !important;
+}
+
+.g-font-size-12 {
+    font-size: 0.85714rem !important;
+}
+
+.media-comment {
+    margin-top:20px
+}
+
+    </style>

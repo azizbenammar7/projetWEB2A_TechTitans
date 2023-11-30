@@ -41,7 +41,7 @@ class CommentaireC
             $query = $db->prepare($sql);
             $query->execute([
                 'text_of_commentaire' => $commentaire->getTextOfCommentaire(),
-                'publication' => $commentaire->getPublicationId(),
+                'publication' => $commentaire->getPublication(),
             ]);
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage();

@@ -137,11 +137,11 @@
               >Forum</a
             >
             <div class="dropdown-menu rounded-0 rounded-bottom m-0">
-              <a href="forum.html" class="dropdown-item active"
+              <a href="addpublication.php" class="dropdown-item active"
                 >Créer une publication</a
               >
               <a href="mes_pubs.html" class="dropdown-item">Mes publications</a>
-              <a href="accueil_forum.html" class="dropdown-item"
+              <a href="accueil_forum.php" class="dropdown-item"
                 >Tous les publications</a
               >
             </div>
