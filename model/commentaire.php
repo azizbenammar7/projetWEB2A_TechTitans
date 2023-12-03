@@ -42,7 +42,7 @@ class Commentaire
 
     public function setPublication(?int $publication): void
     {
-        $this->publication = $publication;
+        $this->publication = $pubID;
         
     }
 }

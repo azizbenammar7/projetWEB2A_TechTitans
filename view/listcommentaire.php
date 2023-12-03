@@ -3,6 +3,8 @@ include '../controller/commentaireC.php';
 
 $commentaireC = new CommentaireC();
 $commentaires = $commentaireC->listCommentaires();  
+
+
 ?>
 
 <html>
@@ -16,6 +18,7 @@ $commentaires = $commentaireC->listCommentaires();
     <h2>
         <a href="addcommentaire.php">Add Comment</a>
     </h2>
+    <div id="comment-list-container">
 
     <table border="1" align="center" width="70%">
         <tr>
@@ -47,6 +50,7 @@ $commentaires = $commentaireC->listCommentaires();
         }
         ?>
     </table>
+    </div>
 </body>
 
 </html>

@@ -8,8 +8,10 @@ class publication
     private ?string $role = null;
     private ?string $text_of_pub = null;
     private ?string $date_pub = null; 
+    private ?int $nbr_like = null;  // New attribute for number of likes
+    private ?int $nbr_dislike = null;  // New attribute for number of dislikes
 
-    public function __construct(int $IDpub=null, string $nom, string $prenom, string $email,string $role, string $text_of_pub, string $date_pub)
+    public function __construct(int $IDpub=null, string $nom, string $prenom, string $email,string $role, string $text_of_pub, string $date_pub, int $nbr_like = null, int $nbr_dislike = null)
     {
         $this->IDpub = $IDpub;
         $this->nom = $nom;
@@ -18,6 +20,8 @@ class publication
         $this->role = $role;
         $this->text_of_pub = $text_of_pub;
         $this->date_pub = $date_pub;
+        $this->nbr_like = $nbr_like;
+        $this->nbr_dislike = $nbr_dislike;
     }
 
     
@@ -94,6 +98,28 @@ class publication
     public function setDatePub($date_pub)
     {
         $this->date_pub = $date_pub;
+        return $this;
+    }
+
+    public function getNbrLike()
+    {
+        return $this->nbr_like;
+    }
+
+    public function getNbrDislike()
+    {
+        return $this->nbr_dislike;
+    }
+
+    public function setNbrLike($nbr_like)
+    {
+        $this->nbr_like = $nbr_like;
+        return $this;
+    }
+
+    public function setNbrDislike($nbr_dislike)
+    {
+        $this->nbr_dislike = $nbr_dislike;
         return $this;
     }
 }

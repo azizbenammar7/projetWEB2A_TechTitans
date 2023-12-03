@@ -1,11 +1,15 @@
 <?php
 include '../controller/pubC.php';
 
-
 $pubC = new pubC();
-$publications = $pubC->listpublications();  
+$publications = $pubC->listpublications();
 
-
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST["datePubFilter"])) {
+        $datePubFilter = $_POST["datePubFilter"];
+        $publications = $pubC->filterPublicationByDate($datePubFilter);
+    } 
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -208,123 +212,332 @@ $publications = $pubC->listpublications();
         </nav>
       </div>
     </div>
-    <div class="search-bar">
-    <form method="GET">
-        
-        <input type="text" id="search" name="search" placeholder="Enter text...">
-        <input type="submit" value="Search">
-    </form>
-</div>
+    
     <!-- Page Header End -->
     <link href="https://netdna.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-    .search-bar {
-  margin-bottom: 20px;
-}
+    
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Add event listeners to all comment links
+    var commentLinks = document.querySelectorAll(".comment-link");
+    commentLinks.forEach(function (link) {
+        link.addEventListener("click", function (event) {
+            event.preventDefault();
+            var publicationId = this.getAttribute("data-publication-id");
+            toggleCommentSection(publicationId);
+        });
+    });
 
-.search-bar form {
-  display: flex;
-  align-items: center;
-}
+    // Add event listeners to all submit comment buttons
+    var submitCommentButtons = document.querySelectorAll(".submit-comment");
+    submitCommentButtons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            var publicationId = this.getAttribute("data-publication-id");
+            submitComment(publicationId);
+        });
+    });
 
-.search-bar label {
-  margin-right: 10px;
-}
+    // Add event listeners to like buttons
+    var likeButtons = document.querySelectorAll(".like-btn");
+    likeButtons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            var publicationId = this.getAttribute("data-publication-id");
+            handleLikeDislike(publicationId, 'like');
+        });
+    });
 
-.search-bar input[type="text"] {
-  padding: 8px;
-  font-size: 14px;
-}
+    // Add event listeners to dislike buttons
+    var dislikeButtons = document.querySelectorAll(".dislike-btn");
+    dislikeButtons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            var publicationId = this.getAttribute("data-publication-id");
+            handleLikeDislike(publicationId, 'dislike');
+        });
+    });
 
-.search-bar input[type="submit"] {
-  padding: 8px 12px;
-  background-color: #4caf50; /* Green */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+    // Function to toggle comment section visibility
+    function toggleCommentSection(publicationId) {
+        var commentSection = document.getElementById("comment-section-" + publicationId);
+        commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
+    }
 
-.search-bar input[type="submit"]:hover {
-  background-color: #45a049;
-}
-</style>
+    // Function to handle comment submission using AJAX
+    function submitComment(publicationId) {
+        var commentText = document.getElementById("comment-text-" + publicationId).value;
+        toggleCommentSection(publicationId)       
+        // Create a new FormData object to send data to the server
+        var formData = new FormData();
+        formData.append('text_of_commentaire', commentText);
+        formData.append('publication', publicationId);
+
+        // Use fetch API to send data to the server
+        fetch('addcommentaire.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+
+            // Check if the server response contains a "message" property
+            if (data.message === "Comment submitted successfully") {
+                // Comment submitted successfully, add it to the list
+                updateCommentList(); // Call the function to update the comment list
+            } else {
+                // Handle the case where the server response indicates an error
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to handle like/dislike actions using AJAX
+    function handleLikeDislike(publicationId, action) {
+        // Create a new FormData object to send data to the server
+        var formData = new FormData();
+        formData.append('action', action);
+        formData.append('publication_id', publicationId);
+
+        // Use fetch API to send data to the server
+        fetch('like_dislike_handler.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Check if the server response contains a "success" property
+            if (data.success) {
+                // Update like or dislike count on the frontend
+                var countElement;
+                if (action === 'like') {
+                    countElement = document.querySelector('.like-count-' + publicationId);
+                } else if (action === 'dislike') {
+                    countElement = document.querySelector('.dislike-count-' + publicationId);
+                }
+
+                if (countElement) {
+                    countElement.innerText = data.newCount;
+                }
+            } else {
+                // Handle the case where the server response indicates an error
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to update the comment list using AJAX
+    function updateCommentList() {
+        // Use fetch API to get the updated comments list from the server
+        fetch('listcommentaire.php')
+        .then(response => response.text())
+        .then(data => {
+            // Replace the existing comments list with the updated one
+            document.getElementById('comment-list-container').innerHTML = data;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+});
+</script>
+
+
+
 
 
   </body>
 </html>
 
 <!-- Accueil Start -->
-<div class="acceuil">
-  <div class="container">
-
-      <!-- Loop through publications and display them -->
-      <?php foreach ($publications as $publication) : ?>
-        <?php
-    // Filter publications based on search criteria
-    if (isset($_GET['search']) && $_GET['search'] != '' && stripos($publication['text_of_pub'], $_GET['search']) === false) {
-        continue; // Skip this publication if it doesn't match the search criteria
-    }
-    ?>
-        <div class="acceuil">
-  <div class="container">
-<div class="row">
-<div class="col-md-8">
-<div class="media g-mb-30 media-comment">
-<img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description">
-<div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
-<div class="g-mb-15">
-<h5 class="h5 g-color-gray-dark-v1 mb-0"><?php echo $publication['nom'] . ' ' . $publication['prenom']; ?></h5>
-<span class="g-color-gray-dark-v4 g-font-size-12"><?php echo $publication['date_pub']; ?></span>
+<div class="search-bar">
+    <form method="GET">
+        <input type="text" id="search" name="search" placeholder="Enter text...">
+        <input type="submit" value="Search">
+    </form>
 </div>
-<p><?php echo $publication['text_of_pub']; ?></p>
-<ul class="list-inline d-sm-flex my-0">
-<li class="list-inline-item g-mr-20">
-<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
-<i class="fa fa-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
-178
-</a>
-</li>
-<li class="list-inline-item g-mr-20">
-<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
-<i class="fa fa-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
-34
-</a>
-</li>
-<li class="list-inline-item ml-auto">
-<a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover" href="#!">
-<i class="fa fa-reply g-pos-rel g-top-1 g-mr-3"></i>
-comment
+
+<div class="search-bar">
+    <form method="post" action="">
+        <label for="datePubFilter"></label>
+        <input type="date" name="datePubFilter">
+        <input type="submit" value="Apply Filter">
+    </form>
+</div>
+
+<div class="acceuil">
+    <div class="container">
+
+        <!-- Loop through publications and display them -->
+        <?php foreach ($publications as $publication) : ?>
+            <?php
+            // Filter publications based on search criteria
+            if (isset($_GET['search']) && $_GET['search'] != '' && strpos($publication['text_of_pub'], $_GET['search']) === false) {
+                continue; // Skip this row if it doesn't match the search criteria
+            }
+            ?>
+
+            <div class="acceuil">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="media g-mb-30 media-comment">
+                                <img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description">
+                                <div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
+                                    <div class="g-mb-15">
+                                        <h5 class="h5 g-color-gray-dark-v1 mb-0"><?php echo $publication['nom'] . ' ' . $publication['prenom']; ?></h5>
+                                        <span class="g-color-gray-dark-v4 g-font-size-12"><?php echo $publication['date_pub']; ?></span>
+                                    </div>
+                                    <p><?php echo $publication['text_of_pub']; ?></p>
+                                    <ul class="list-inline d-sm-flex my-0">
+                                    <li class="list-inline-item g-mr-20">
+    <a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover like-btn" href="#!" data-publication-id="<?= $publication['IDpub']; ?>">
+        <i class="fa fa-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
+        <span class="like-count"><?= $publication['nbr_like']; ?></span>
+        
     </a>
 </li>
-</ul>
-</div>
-</div>
-</div>
 
-          
+<!-- Dislike button -->
+<li class="list-inline-item g-mr-20">
+    <a class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover dislike-btn" href="#!" data-publication-id="<?= $publication['IDpub']; ?>">
+        <i class="fa fa-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
+        <span class="dislike-count"><?= $publication['nbr_dislike']; ?></span>
+    </a>
+</li>
+                                        <li class="list-inline-item ml-auto">
+                                            <!-- Link to show/hide comment section -->
+                                            <a href="#" class="comment-link" data-publication-id="<?= $publication['IDpub']; ?>">Comment</a>
 
+                                            <!-- Comment section (initially hidden) -->
+                                            <div class="comment-section" id="comment-section-<?= $publication['IDpub']; ?>" style="display: none;">
+                                                <textarea rows="4" cols="50" placeholder="Write your comment" id="comment-text-<?= $publication['IDpub']; ?>"></textarea>
+                                                <button class="submit-comment" data-publication-id="<?= $publication['IDpub']; ?>">Submit</button>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-      <?php endforeach; ?>
-  </div>
+        <?php endforeach; ?>
 
-  <!-- Comment Area -->
-  <div class="comment-area hide" id="comment-area">
-      <textarea name="comment" id="" placeholder="comment here ... "></textarea>
-      <input type="submit" value="submit">
-  </div>
+    </div>
 
-  <!-- Comments Section -->
+    <!-- Comment Area -->
+    <div class="comment-area hide" id="comment-area">
+        <textarea name="comment" id="" placeholder="comment here ... "></textarea>
+        <input type="submit" value="submit">
+    </div>
 
+    <!-- Accueil End -->
 
-  <!-- Reply Area -->
-  <div class="comment-area hide" id="reply-area">
-      <textarea name="reply" id="" placeholder="reply here ... "></textarea>
-      <input type="submit" value="submit">
-  </div>
-</div>
-<!-- Accueil End -->
+<style>
+    .search-bar {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
+    .search-bar form {
+        display: inline-block;
+    }
+
+    .search-bar label {
+        margin-right: 10px;
+    }
+
+    .search-bar input[type="text"] {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .search-bar input[type="submit"] {
+        padding: 8px 12px;
+        background-color: #4caf50; /* Green */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .search-bar input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+
+    /* Style for the comment section */
+.comment-section {
+    background-color: #f7f7f7;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+/* Style for the comment text area */
+.comment-section textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical; /* Allow vertical resizing of the textarea */
+}
+
+/* Style for the comment submit button */
+.comment-section button.submit-comment {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-section button.submit-comment:hover {
+    background-color: #45a049;
+}
+
+/* Additional styling for the entire comment area */
+.comment-area {
+    background-color: #f7f7f7;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.comment-area textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical; /* Allow vertical resizing of the textarea */
+}
+
+.comment-area input[type="submit"] {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-area input[type="submit"]:hover {
+    background-color: #45a049;
+}
+</style>
 
   <!-- Footer Start -->
   <div
@@ -440,7 +653,7 @@ comment
         console.log('hey')
     var commentArea = document.getElementById("comment-area");
     commentArea.classList.toggle("hide");
-}
+  }
 function showReply(){
     var replyArea = document.getElementById("reply-area");
     replyArea.classList.toggle("hide");

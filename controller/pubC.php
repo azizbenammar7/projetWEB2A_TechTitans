@@ -4,6 +4,13 @@ require '../config.php';
 
 class PubC
 {
+    private $db; // Add this property
+
+    public function __construct()
+    {
+        $this->db = Config::getConnexion(); // Initialize the $db property
+    }
+
     public function listPublications()
     {
         $sql = "SELECT * FROM publication"; 
@@ -101,5 +108,52 @@ class PubC
             echo 'error: ' . $e->getMessage();
         }
     }
+
+
+    public function filterPublicationByDate($date_pub)
+    {
+        // Construction de la requête SQL
+        $sql = "SELECT * FROM publication WHERE DATE(date_pub) = :date_pub";
+        
+        // Préparation de la requête
+        $stmt = $this->db->prepare($sql);
+        
+        // Liaison du paramètre
+        $stmt->bindParam(':date_pub', $date_pub, PDO::PARAM_STR);
+        
+        // Exécution de la requête
+        $stmt->execute();
+        
+        // Récupération des résultats
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function likePublication($IDpublication)
+{
+    $sql = "UPDATE publication SET nbr_like = nbr_like + 1 WHERE IDpub = :IDpub";
+    $this->updateCount($IDpublication, $sql);
+}
+
+public function dislikePublication($IDpublication)
+{
+    $sql = "UPDATE publication SET nbr_dislike = nbr_dislike + 1 WHERE IDpub = :IDpub";
+    $this->updateCount($IDpublication, $sql);
+}
+
+private function updateCount($IDpublication, $sql)
+{
+    $db = Config::getConnexion();
+    $req = $db->prepare($sql);
+    $req->bindValue(':IDpub', $IDpublication);
+
+    try {
+        $req->execute();
+    } catch (Exception $e) {
+        die('Error:' . $e->getMessage());
+    }
+}
+
+
 }
 ?>
