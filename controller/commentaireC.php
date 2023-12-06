@@ -88,7 +88,19 @@ class CommentaireC
             echo 'error: ' . $e->getMessage();
         }
     }
-
+    public function listCommentairesByPublication($IDpublication)
+    {
+        $sql = "SELECT * FROM commentaire WHERE publication = :IDpublication";
+        $db = Config::getConnexion();
+        try {
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':IDpublication', $IDpublication, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            die('Error:' . $e->getMessage());
+        }
+    }
 
     
 }

@@ -308,6 +308,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </a>
 </li>
                                         <li class="list-inline-item ml-auto">
+                                                                 <!-- Link to show all comments -->
+                        <a href="comments.php?IDpublication=<?= $publication['IDpub']; ?>" class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover">
+                            See All Comments
+                        </a>
                                             <!-- Link to show/hide comment section -->
                                             <a href="#" class="comment-link" data-publication-id="<?= $publication['IDpub']; ?>">Comment</a>
 
@@ -380,7 +384,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             var commentSection = document.getElementById("comment-section-" + publicationId);
             commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
         }
-
+        
         // Function to handle comment submission using AJAX
         function submitComment(publicationId) {
             var commentText = document.getElementById("comment-text-" + publicationId).value;

@@ -5,7 +5,14 @@ $commentaireC = new CommentaireC();
 $commentaires = $commentaireC->listCommentaires();  
 
 
+// Retrieve the IDpublication from the URL
+$IDpublication = isset($_GET['IDpublication']) ? $_GET['IDpublication'] : null;
+
+// List comments based on the IDpublication
+$commentaires = $commentaireC->listCommentairesByPublication($IDpublication);
 ?>
+
+
 
 <html>
 

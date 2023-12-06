@@ -159,39 +159,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <th>date of publication</th>
                         <th>Number of Likes</th> <!-- New column for nbr_like -->
                         <th>Number of Dislikes</th> <!-- New column for nbr_dislike -->
+                        <th>Commentaires</th>
                         <th>Update</th>
                         <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    foreach ($publications as $publication) {
-                        // Filter publications based on search criteria
-                        if (isset($_GET['search']) && $_GET['search'] != '' && strpos($publication['IDpub'], $_GET['search']) === false) {
-                            continue; // Skip this row if it doesn't match the search criteria
-                        }
-                    ?>
-                        <tr>
-                            <td><?= $publication['IDpub']; ?></td>
-                            <td><?= $publication['nom']; ?></td>
-                            <td><?= $publication['prenom']; ?></td>
-                            <td><?= $publication['email']; ?></td>
-                            <td><?= $publication['text_of_pub']; ?></td>
-                            <td><?= $publication['date_pub']; ?></td>
-                            <td><?= $publication['nbr_like']; ?></td> <!-- Display nbr_like -->
-                            <td><?= $publication['nbr_dislike']; ?></td> <!-- Display nbr_dislike -->
-                            <td>
-                                <form method="POST" action="update_pub.php">
-                                    <input type="submit" name="update" value="Update">
-                                    <input type="hidden" value="<?= $publication['IDpub']; ?>" name="IDpublication">
-                                </form>
-                            </td>
-                            <td>
-                                <a href="delete_pub.php?IDpublication=<?= $publication['IDpub']; ?>">Delete</a>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
+    <?php
+    foreach ($publications as $publication) {
+        // Filter publications based on search criteria
+        if (isset($_GET['search']) && $_GET['search'] != '' && strpos($publication['IDpub'], $_GET['search']) === false) {
+            continue; // Skip this row if it doesn't match the search criteria
+        }
+    ?>
+        <tr>
+            <td><?= $publication['IDpub']; ?></td>
+            <td><?= $publication['nom']; ?></td>
+            <td><?= $publication['prenom']; ?></td>
+            <td><?= $publication['email']; ?></td>
+            <td><?= $publication['text_of_pub']; ?></td>
+            <td><?= $publication['date_pub']; ?></td>
+            <td><?= $publication['nbr_like']; ?></td>
+            <td><?= $publication['nbr_dislike']; ?></td>
+            <td>
+                <a href="listcommentaire.php?IDpublication=<?= $publication['IDpub']; ?>">Commentaires</a>
+            </td>
+            <td>
+                <form method="POST" action="update_pub.php">
+                    <input type="submit" name="update" value="Update">
+                    <input type="hidden" value="<?= $publication['IDpub']; ?>" name="IDpublication">
+                </form>
+            </td>
+            <td>
+                <a href="delete_pub.php?IDpublication=<?= $publication['IDpub']; ?>">Delete</a>
+            </td>
+        </tr>
+    <?php } ?>
+</tbody>
             </table>
         </div>
     </div>
