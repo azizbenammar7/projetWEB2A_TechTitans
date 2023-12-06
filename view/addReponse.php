@@ -17,40 +17,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $etat = $_POST['etat'];
     $reclamation = $_POST['id'];
 
-    // Vérifier si tous les champs sont remplis
-    if (empty($description)) {
-        $error = "Veuillez remplir tous les champs.";
-    } else {
-        try {
-            // Créer une instance de Reponse
-            $reponse = new Reponse(
-                $description,
-                (int)$etat,
-                (int)$reclamation
-            );
+// Vérifier si tous les champs sont remplis
+if (empty($description)) {
+    $error = "Veuillez remplir tous les champs.";
+} else {
+    try {
+        // Créer une instance de Reponse
+        $reponse = new Reponse(
+            $description,
+            (int)$etat,
+            (int)$reclamation
+        );
 
-            // Ajouter la réponse à la base de données
-            $reponseController = new ReponseController(); // Ajout de cette ligne
-            $reponseController->addReponse($reponse);
+        // Ajouter la réponse à la base de données
+        $reponseController = new ReponseController();
+        $idReponse = $reponseController->addReponse($reponse);
 
-            // Mettre à jour l'état de la réclamation en fonction du nombre de réponses
-            $nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
+        // Envoi d'un email
+// Exemple d'utilisation
+$emailSender = new EmailSender();
+$textContent = 'Contenu du message...';
+$recipientEmail = 'mellouli.youssef11@gmail.com';
 
-            // Redirection après l'ajout de la réponse
-            header('Location: listreponse.php');
-            exit();
-        } catch (Exception $e) {
-            // Gestion de l'erreur
-            $error = "Erreur lors de l'ajout de la réponse : " . $e->getMessage();
-        }
+$emailSender->sendEmail($textContent, $recipientEmail);
+        
+        exit();
+    } catch (Exception $e) {
+        // Gestion de l'erreur
+        $error = "Erreur lors de l'ajout de la réponse : " . $e->getMessage();
     }
+}
 }
 
 // Mettre à jour l'état de la réclamation en fonction du nombre de réponses
-$nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
+//$nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
+$etatReclamation = $reclamationController->getEtatReclamation($reclamation);
+
+// Définir le message en fonction de l'état
+if ($etatReclamation == 0) {
+    $message = "<span style='color: black;'><strong>Cette réclamation n'est pas traitée.</strong></span>";
+} else {
+    $message = "<span style='color: black;'><strong>Cette réclamation est traitée.</strong></span>";
+}
+
 
 // Afficher la nouvelle valeur de l'état
-echo "Nouvel état : " . $nouvelEtat;
+//echo "Nouvel état : " . $nouvelEtat;
 
 // Initialiser les variables
 $reponseController = new ReponseController(); // Ajout de cette ligne
@@ -159,6 +171,8 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
     <?php if (!empty($error)) : ?>
         <p style="color: red;"><?php echo $error; ?></p>
     <?php endif; ?>
+
+    <p><?php echo $message; ?></p>
 
     <form action="addReponse.php" method="POST">
         <label for="description">Description :</label>

@@ -61,6 +61,8 @@ if (isset($_GET['id'])) {
 
     // Récupérer les informations actuelles de la réponse
     $selectedReponse = $reponseController->getReponseById($idReponse);
+    $message = "<span style='color: black;'><strong>Cette réclamation est traitée.</strong></span>";
+
 
     if (!$selectedReponse) {
         // Redirection si la réponse n'est pas trouvée
@@ -180,12 +182,14 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
     <title>Update Reponse</title>
 </head>
 
+
 <body>
     <h2>Update Reponse</h2>
 
     <?php if (!empty($error)) : ?>
         <p style="color: red;"><?php echo $error; ?></p>
     <?php endif; ?>
+    <p><?php echo $message; ?></p>
 
     <form action="updateReponse.php?id=<?= $idReponse; ?>" method="POST">
         <label for="description">Description :</label>

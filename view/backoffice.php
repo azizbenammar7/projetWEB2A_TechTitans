@@ -4,6 +4,33 @@ include "../controller/reclamation.php";
 $reclamationController = new ReclamationController();
 $reclamations = $reclamationController->listReclamation();
 
+// Récupérer la valeur du champ de saisie du type
+$searchTyp = isset($_GET['searchTyp']) ? $_GET['searchTyp'] : null;
+
+// Utilisez la fonction listReclamationByType avec le type comme paramètre
+$reclamations = $reclamationController->listReclamationByType($searchTyp);
+
+// Récupérer la valeur du champ de filtre d'état
+$etat = isset($_GET['etat']) ? $_GET['etat'] : null;
+
+if (!is_null($etat)) {
+    // Utilisez la fonction getReclamationsByEtat avec l'état comme paramètre
+    $reclamations = $reclamationController->getReclamationsByEtat($etat);
+} else {
+    // Si l'état n'est pas sélectionné, utilisez la fonction listReclamationByType
+    $reclamations = $reclamationController->listReclamationByType($searchTyp);
+}
+
+// Vérifier si la requête est de type POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupérer la valeur du champ de saisie de la date
+    $dateAjoutFilter = $_POST["dateAjoutFilter"];
+    
+    // Utilisez la fonction filterReclamationByDateAjout avec la date comme paramètre
+    $reclamations = $reclamationController->filterReclamationByDateAjout($dateAjoutFilter);
+    
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -135,6 +162,7 @@ $reclamations = $reclamationController->listReclamation();
         
         <!-- /. NAV SIDE  -->
         
+        
         <div id="page-wrapper">
             <div id="page-inner">
                 <div class="row">
@@ -153,6 +181,38 @@ $reclamations = $reclamationController->listReclamation();
     <div class="panel-heading">
         Reclamations Table
     </div>
+    <body>
+
+<form action="" method="GET">
+    <label for="searchTyp">Search by Type:</label>
+    <select id="searchTyp" name="searchTyp">
+        <option value="">All</option>
+        <option value="médecin">Médecin</option>
+        <option value="pharmacien">Pharmacien</option>
+        <option value="patient">Patient</option>
+        <option value="médicament">Médicament</option>
+        <option value="autre">Autre</option>
+    </select>
+    <input type="submit" name="typeSubmit" value="Filter by Type">
+</form>
+
+<form method="post" action="">
+    <label for="dateAjoutFilter">Filter by Date:</label>
+        <input type="date" name="dateAjoutFilter">
+        <input type="submit" value="Apply Filter">
+</form>
+<form action="" method="GET">
+    <label for="etat">Filter by Etat:</label>
+    <select id="etat" name="etat">
+        <option value="">All</option>
+        <option value="1">Etat Traite</option>
+        <option value="0">Etat non Traite</option>
+    </select>
+    <input type="submit" name="etatSubmit" value="Filter by Etat">
+</form>
+
+
+<body>
     <div class="panel-body">
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
@@ -164,7 +224,9 @@ $reclamations = $reclamationController->listReclamation();
                         <th>Piece Jointe</th>
                         <th>Date d'Ajout</th>
                         <th>Etat</th>
+                        <th>voir Reponses</th>
                         <th>Action</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -179,7 +241,15 @@ $reclamations = $reclamationController->listReclamation();
                                 </a>
                             </td>
                             <td><?= $reclamation['date_ajout']; ?></td>
-                            <td><?= $reclamation['etat']; ?></td>
+                            <td>
+                        <?php echo ($reclamation['etat'] == 1) ? 'Etat Traité' : 'Etat non Traité'; ?>
+                    </td>
+                    <td>
+    <a href="voirReponses.php?idReclamation=<?= $reclamation['id']; ?>">Voir Réponses</a>
+</td>
+
+
+
                             <td>
                             <a href="addReponse.php?id=<?= $reclamation['id']; ?>" class="btn btn-primary mt-2">Ajouter une réponse</a>
 

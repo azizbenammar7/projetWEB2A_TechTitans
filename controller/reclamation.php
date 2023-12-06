@@ -271,7 +271,48 @@ public function updateReclamationEtat($reclamation, $etat)
     }
 }
 
+public function getEtatReclamation($reclamationId)
+{
+    try {
+        $stmt = $this->db->prepare("SELECT etat FROM reclamation WHERE id = :id");
+        $stmt->bindParam(':id', $reclamationId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Vérifier si la réclamation existe
+        if ($result !== false) {
+            return $result['etat'];
+        } else {
+            // La réclamation n'existe pas
+            return null;
+        }
+    } catch (Exception $e) {
+        // Gérez les erreurs
+        throw new Exception("Erreur lors de la récupération de l'état de la réclamation : " . $e->getMessage());
+    }
+}
+
+public function getnoteByReclamation($reclamation)
+{
+    $sql = "SELECT idreponse, description, etat, idreclamation, note_satisfaction FROM reponse WHERE reclamation = :reclamation";
+    try {
+        $query = $this->db->prepare($sql);
+        $query->bindValue(':reclamation', $reclamation, PDO::PARAM_INT);
+        $query->execute();
+        $reponses = $query->fetchAll(PDO::FETCH_CLASS, 'Reponse');
+
+        return $reponses;
+    } catch (Exception $e) {
+        throw new Exception('Erreur lors de la récupération des réponses: ' . $e->getMessage());
+    }
+}
+function generateText($idReclamation) {
+    // Créez le contenu du texte avec l'id de la réclamation
+    $textContent = "Vous avez reçu une réponse pour la réclamation avec l'identifiant : " . $idReclamation . "\n";
+
+    // Retournez le contenu du texte
+    return $textContent;
+}
 
 
 
