@@ -39,25 +39,46 @@ try {
 <head>
     <title>Reset Password</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-</head>
-<body>
+    <link rel="stylesheet" type="text/css" href="css/style1.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script type="text/javascript" src="js/main1.js"></script></head>
 
-    <h1>Reset Password</h1>
 
-    <form method="post" action="process-reset-password.php">
+    <body>
+    <img class="wave" src="img/wave.png">
+    <div class="container">
+        <div class="img">
+            <img src="img/bg.png">
+        </div>
+        <div class="login-content">
 
-        <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+            <form method="post" action="process-reset-password.php">
+            <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
-        <label for="motdepasse">New password</label>
-        <input type="password" name="motdepasse" id="motdepasse" required>
+                <h2 class="title">Mot de passe oublié</h2>
+                <div class="input-div">
+                    <div class="i">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="div">
+                        <h5>Nouveau mot de passe</h5>
+                        <input type="password" class="input" name="motdepasse" id="motdepasse" required>
+                    </div>
+                </div>
+                <div class="input-div">
+                    <div class="i">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="div">
+                        <h5>Répéter le mot de passe</h5>
+                        <input type="password" class="input" id="password_confirmation" name="password_confirmation" required>
+                    </div>
+                </div>
+                <button class="btn">Send</button>
+            </form>
 
-        <label for="password_confirmation">Repeat password</label>
-        <input type="password" id="password_confirmation"
-               name="password_confirmation">
-
-        <button>Send</button>
-    </form>
-
+        </div>
+    </div>
 </body>
 </html>

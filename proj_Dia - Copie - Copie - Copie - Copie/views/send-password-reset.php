@@ -37,7 +37,7 @@ try {
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
         if (mail($to, $subject, $message, $headers)) {
-            echo "Message sent, please check your inbox.";
+            echo "Message envoyé, veuillez vérifier votre boîte de réception.";
         } else {
             echo "Message could not be sent.";
         }

@@ -60,7 +60,54 @@ $motdepasse = md5($_POST["motdepasse"]);
 
     $stmtUpdate->execute();
 
-    echo "Password updated. You can now login.";
+    $stmtUpdate->execute();
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Updated</title>
+        <link rel="stylesheet" type="text/css" href="css/style1.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script type="text/javascript" src="js/main1.js"></script>
+    <style>
+      
+
+        p {
+            margin-top: 250px; /* Adjust the margin as needed */
+            font-size: 20px; /* Adjust the font size as needed */
+            cursor: pointer; /* Add pointer cursor to indicate clickability */
+           
+        }
+    </style>
+    </head>
+    <body>
+        <!-- Add your image here -->
+        <div class="container">
+        <div class="img">
+            <img src="img/success.png">
+        </div>
+        <p id="successMessage">Le mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.</p>
+
+<!-- JavaScript to redirect to login.php when the paragraph is clicked -->
+<script>
+    // Function to redirect when the paragraph is clicked
+    function redirectToLogin() {
+        window.location.href = "login.php";
+    }
+
+    // Add an event listener to the paragraph
+    document.getElementById("successMessage").addEventListener("click", redirectToLogin);
+
+    // Optionally, you can still have the automatic redirection after a delay
+    setTimeout(redirectToLogin, 15000); // Redirect after 5 seconds (adjust as needed)
+</script>
+    </body>
+    </html>
+    <?php
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
+?>
