@@ -12,6 +12,12 @@ class User
     private ?string $ville = null;
     private ?string $diplome = null;
     private ?string $motdepasse = null;
+    private ?string $pdp = null;
+    private ?string $accountActivationHash = null;
+
+
+
+
 
 
     public function __construct(
@@ -24,8 +30,10 @@ class User
         ?int $typeDiabete = null,
         ?string $ville = null,
         ?string $diplome = null,
-        ?string $motdepasse = null
-       
+        ?string $motdepasse = null,
+        ?string $pdp = null,
+        ?string $accountActivationHash = null
+
     ) {
         $this->id = $id;
         $this->nom = $nom;
@@ -37,6 +45,8 @@ class User
         $this->ville = $ville;
         $this->diplome = $diplome;
         $this->motdepasse = $motdepasse;
+        $this->pdp = $pdp;
+        $this->accountActivationHash = $accountActivationHash;
 
 
     }
@@ -143,6 +153,25 @@ class User
         $this->motdepasse = $motdepasse;
         return $this;
     }
-  
+    public function getPdp()
+    {
+        return $this->pdp;
+    }
+
+    public function setPdp($pdp)
+    {
+        $this->pdp = $pdp;
+        return $this;
+    }
+    public function getAccountActivationHash()
+    {
+        return $this->accountActivationHash;
+    }
+    
+    public function setAccountActivationHash($accountActivationHash)
+    {
+        $this->accountActivationHash = $accountActivationHash;
+        return $this;
+    }
 }
 

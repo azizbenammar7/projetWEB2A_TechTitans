@@ -2,8 +2,20 @@
 include "../controller/UserC.php";
 
 $c = new UserC();
+
 $users = $c->listUsers();
+$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+$roleFilter = isset($_GET['role_user']) ? $_GET['role_user'] : '';
+
+if (!empty($roleFilter)) {
+    $users = $c->listUsersByRole($roleFilter);
+} else {
+    $users = $c->listUsers($searchTerm);
+}
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -104,25 +116,56 @@ $users = $c->listUsers();
                 </div>
                 <!-- /. ROW -->
                 <hr />
+                <div class="row">
+    <div class="col-md-6">
+        <form method="GET" action="">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for users..." name="search">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+                </span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+        <div class="col-md-6">
+            <form method="GET" action="">
+                <div class="input-group">
+                    <select class="form-control" name="role_user">
+                        <option value="">Select Role</option>
+                        <option value="patient">Patient</option>
+                        <option value="medecin">Medecin</option>
+                        <option value="pharmacien">Pharmacien</option>
+                    </select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">Filter by Role</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
 
                 <!-- USER TABLE -->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                Advanced Tables
-                            </div>
-                            <div class="panel-body">
+                            list de d'utilisateurs                            <div class="panel-body">
                                 <div class="table-responsive">
                                     <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                         <thead>
                                             <tr>
                                                 <th>Id User</th>
+                                                <th>photo de profil</th>
                                                 <th>Nom</th>
                                                 <th>Prenom</th>
+                                                <th>Last Login</th>
                                                 <th>Email</th>
                                                 <th>mot de passe</th>
                                                 <th>Tel</th>
+                                                <th>Is Banned</th>
                                                 <th>Role</th>
                                                 <th>Type de Diabete</th>
                                                 <th>Ville</th>
@@ -137,11 +180,34 @@ $users = $c->listUsers();
                                             ?>
                                                 <tr>
                                                     <td><?= $user['id']; ?></td>
+                                                    <td>
+    <?php
+    if (!empty($user['pdp'])) {
+        echo '<div style="width: 100px; height: 100px; overflow: hidden; border-radius: 50%;"><img src="' . $user['pdp'] . '" alt="pdp" style="width: 100%; height: 100%; object-fit: cover;"></div>';
+    } else {
+        echo 'Aucune photo de profil';
+    }
+    ?>
+</td>
                                                     <td><?= $user['nom']; ?></td>
                                                     <td><?= $user['prenom']; ?></td>
+                                                    <td><?= $user['last_login']; ?></td>
                                                     <td><?= $user['email']; ?></td>
                                                     <td><?= $user['motdepasse']; ?></td>
                                                     <td><?= $user['tel']; ?></td>
+                                                    <td>
+    <?php if (isset($user['is_banned']) && $user['is_banned']): ?>
+        <form method="POST" action="unbanUser.php">
+            <input type="submit" name="unban" value="Unban">
+            <input type="hidden" value="<?= $user['id']; ?>" name="userId">
+        </form>
+    <?php else: ?>
+        <form method="POST" action="banUser.php">
+            <input type="submit" name="ban" value="Ban">
+            <input type="hidden" value="<?= $user['id']; ?>" name="userId">
+        </form>
+    <?php endif; ?>
+</td>
                                                     <td><?= $user['role_user']; ?></td>
                                                     <td><?= $user['typeDiabete']; ?></td>
                                                     <td><?= $user['ville']; ?></td>
@@ -163,10 +229,15 @@ $users = $c->listUsers();
                                                     <td>
                                                         <a href="deleteUser.php?id=<?= $user['id']; ?>">Delete</a>
                                                     </td>
+                                                
                                                 </tr>
-                                            <?php
-                                            }
-                                            ?>
+                                           
+                                        </td>
+                                    </tr>
+                                <?php
+                                }
+                                ?>
+                                          
                                         </tbody>
                                     </table>
                                 </div>

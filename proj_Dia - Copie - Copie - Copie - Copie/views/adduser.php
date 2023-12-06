@@ -20,8 +20,8 @@ if (
     isset($_POST["typeDiabete"]) &&
     isset($_POST["ville"]) &&
     isset($_FILES["diplome"]) &&
-    isset($_POST["motdepasse"])
-
+    isset($_POST["motdepasse"]) &&
+    isset($_FILES["pdp"])
 ) {
     if (
         !empty($_POST['nom']) &&
@@ -31,42 +31,75 @@ if (
         !empty($_POST["role_user"]) &&
         !empty($_POST["motdepasse"])
     ) {
-        // Vérification et traitement de l'upload du diplôme
-        $diplome = null;
-        if ($_FILES['diplome']['error'] == UPLOAD_ERR_OK) {
-            $uploadDir = 'uploads/';
-            if (!file_exists($uploadDir) && !mkdir($uploadDir, 0777, true)) {
-                die('Failed to create upload directory');
+        // Check if the email already exists
+        if ($userC->emailExists($_POST['email'])) {
+            $error = "L'adresse e-mail existe déjà. Veuillez choisir une adresse e-mail différente.";
+        } else {
+            // Vérification et traitement de l'upload du diplôme
+            $diplome = null;
+            if ($_FILES['diplome']['error'] == UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/';
+                if (!file_exists($uploadDir) && !mkdir($uploadDir, 0777, true)) {
+                    die('Failed to create upload directory');
+                }
+
+                $uploadFile = $uploadDir . basename($_FILES['diplome']['name']);
+
+                if (move_uploaded_file($_FILES['diplome']['tmp_name'], $uploadFile)) {
+                    $diplome = $uploadFile;
+                } else {
+                    $error = "Erreur lors de l'upload du diplôme.";
+                }
+            }
+            $pdp = null;
+            if ($_FILES['pdp']['error'] == UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/';
+                if (!file_exists($uploadDir) && !mkdir($uploadDir, 0777, true)) {
+                    die('Failed to create upload directory');
+                }
+
+                $uploadFile = $uploadDir . basename($_FILES['pdp']['name']);
+
+                if (move_uploaded_file($_FILES['pdp']['tmp_name'], $uploadFile)) {
+                    $pdp = $uploadFile;
+                } else {
+                    $error = "Erreur lors de l'upload du photo de profil.";
+                }
             }
 
-            $uploadFile = $uploadDir . basename($_FILES['diplome']['name']);
+            $activation_token = bin2hex(random_bytes(16));
+            $activation_token_hash = hash("sha256", $activation_token);
 
-            if (move_uploaded_file($_FILES['diplome']['tmp_name'], $uploadFile)) {
-                $diplome = $uploadFile;
-            } else {
-                $error = "Erreur lors de l'upload du diplôme.";
-            }
+            $user = new User(
+                null,
+                $_POST['nom'],
+                $_POST['prenom'],
+                $_POST['email'],
+                $_POST['tel'],
+                $_POST['role_user'],
+                intval($_POST['typeDiabete']),
+                $_POST['ville'],
+                $diplome,
+                md5($_POST['motdepasse']),
+                $pdp,
+                $activation_token_hash 
+            );
+           
+            $userC->addUser($user);
+
+            // Send activation email
+            $activation_link = "http://localhost/proj_Dia%20-%20Copie%20-%20Copie%20-%20Copie%20-%20Copie/views/activate-account.php?token=$activation_token_hash";
+            $subject = "Activer votre compte";
+            $message = "Merci de vous être inscrit chez DiaZen ! Cliquez sur le lien suivant pour activer votre compte: $activation_link";
+            $headers = "From: noreply@example.com";
+            
+            mail($_POST['email'], $subject, $message, $headers);
+            
+            // Redirect to the login page
+            header('Location: signup-success.php');
+            exit;
         }
-
-        // Création de l'objet User avec le diplôme
-        
-        $user = new User(
-            null,
-            $_POST['nom'],
-            $_POST['prenom'],
-            $_POST['email'],
-            $_POST['tel'],
-            $_POST['role_user'],
-            intval($_POST['typeDiabete']),
-            $_POST['ville'],
-            $diplome,
-            md5($_POST['motdepasse'])        );
-
-        $userC->addUser($user);
-        header('Location: dashboard.php');
-    } else {
-        $error = "Missing information";
-    }
+    } 
 }
 
 ?>
@@ -168,7 +201,22 @@ if (!validateName(prenomInput.value)) {
     });
 </script>
 </head>
+<style>
+    /* Add this style to position the error message */
+    
+    /* Updated style to position the error message at the top left */
+    .error-message {
+        position: fixed;
+        top: 10px;
+        left: 10px;  /* Change 'right' to 'left' */
+        background-color: #ffdddd;
+        padding: 10px;
+        border: 1px solid #f00;
+        border-radius: 5px;
+        display: <?php echo empty($error) ? 'none' : 'block'; ?>;
+    }
 
+</style>
 <body>
 <img class="wave" src="img/wave.png">
     <div class="container">
@@ -192,6 +240,13 @@ if (!validateName(prenomInput.value)) {
         <td><label for="prenom">Prénom :</label></td>
         <td>
             <input type="text" id="prenom" name="prenom" />
+        </td>
+    </tr>
+    <tr id="pdpRow">
+        <td><label for="pdp">photo de profil :</label></td>
+        <td>
+            <input type="file" name="pdp" />
+            <span id="erreurPdp" style="color: red"></span>
         </td>
     </tr>
     <tr>
@@ -286,6 +341,9 @@ if (!validateName(prenomInput.value)) {
                 
             </form>
         </div>
+    </div>
+    <div class="error-message">
+        <?php echo $error; ?>
     </div>
 </body>
 

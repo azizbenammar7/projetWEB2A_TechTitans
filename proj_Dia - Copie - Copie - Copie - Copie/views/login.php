@@ -27,11 +27,15 @@
         $motdepasse = $_POST["motdepasse"];
     
         $userC = new UserC();
+        if (!$userC->isAccountActivated($email)) {
+            $loginError = "Votre compte n'est pas activé. Veuillez vérifier votre e-mail pour l'activation.";
+        } else {
         $user = $userC->loginUser($email, md5($motdepasse));
     
-        var_dump($user); // Add this line for debugging
     
-        if ($user) {
+        if ($user && isset($user['is_banned']) && $user['is_banned']) {
+            $loginError = "Your account is banned. Please contact support for assistance.";}
+          elseif ($user) {
             if (isset($user['is_admin']) && $user['is_admin']) {
                 // Admin login logic (if needed)
                 header("Location: listusers.php");
@@ -43,13 +47,12 @@
                 header("Location: dashboard.php");
                 exit();
             }
-        }
-    
-        // If no valid login is detected
-        $loginError = "Invalid email or mot de passe";
+        } else {
+            // If no valid login is detected
+            $loginError = "Invalid email or mot de passe";
+        }}
     }
-
-?>
+    ?>
 
             <!-- Your HTML fo the login form -->
             <form method="POST" action="">

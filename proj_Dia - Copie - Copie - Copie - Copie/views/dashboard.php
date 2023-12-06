@@ -140,6 +140,8 @@ session_start();
         // Récupérer les informations de l'utilisateur à partir de la base de données
         $userC = new UserC();
         $user = $userC->showUser($_SESSION['user_id']);
+        $_SESSION['user_details'] = $user;
+
         ?>
 
         <div id="text"></div>
@@ -172,6 +174,16 @@ session_start();
 </style>
 
 <ul>
+<li><?php
+                       if (!empty($user['pdp'])) {
+                        echo '<div style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%;">';
+                        echo '<img src="' . $user['pdp'] . '" alt="pdp" style="width: 100%; height: 100%; object-fit: cover;">';
+                        echo '</div>';
+                    } else {
+                        echo '<div style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%;">';
+                        echo '<img src="img/other.png" alt="other" style="width: 100%; height: 100%; object-fit: cover;">';
+                        echo '</div>';
+                    }?>
     <li><strong>Nom:</strong> <?= $user['nom']; ?></li>
     <li><strong>Prénom:</strong> <?= $user['prenom']; ?></li>
     <li><strong>Email:</strong> <?= $user['email']; ?></li>
@@ -189,6 +201,8 @@ session_start();
             <!-- Ajoutez d'autres informations si nécessaire -->
         </ul>
         <a class="btn" href="logout.php">Se déconnecter</a>
+        <a class="btn" href="updateuser1.php">Mettre à jour profil</a>
+
     </div>
 </div>
 <!-- Service End -->
