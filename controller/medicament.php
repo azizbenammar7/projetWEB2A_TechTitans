@@ -196,8 +196,68 @@ public function filterMedicamentByLieu($lieu)
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+public function listMedicamentPagination($offset, $limit)
+{
+    $sql = "SELECT m.*, t.typ as type_nom FROM medicament m
+            LEFT JOIN type t ON m.typ = t.id
+            LIMIT :offset, :limit";
+    $stmt = $this->connexion->prepare($sql);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
+public function countMedicaments()
+{
+    $sql = "SELECT COUNT(*) as total FROM medicament";
+    $stmt = $this->connexion->query($sql);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    return $result['total'];
+}
+
+public function filterMedicamentByNameAndLieu($nom, $lieu)
+{
+    try {
+        // Utilisez la table correcte (medicament au lieu de medicaments)
+        $query = "SELECT * FROM medicament WHERE nom = :nom AND lieu = :lieu";
+        $stmt = $this->connexion->prepare($query);
+        $stmt->bindParam(":nom", $nom);
+        $stmt->bindParam(":lieu", $lieu);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Gérer les erreurs de base de données
+        echo 'Error: ' . $e->getMessage();
+    }
+}
+// Dans votre contrôleur de médicaments (medicament.php) ou là où vous définissez vos fonctions
+
+public function searchMedicamentByNameAndLieu($nom, $lieu) {
+    // Mettez en œuvre la logique pour rechercher les médicaments par nom et lieu
+    // Utilisez une requête SQL ou tout autre mécanisme que vous utilisez pour récupérer les données filtrées
+    $query = "SELECT * FROM medicaments WHERE nom = :nom AND lieu = :lieu";
+    $stmt = $this->connexion->prepare($query);
+    $stmt->bindParam(":nom", $nom);
+    $stmt->bindParam(":lieu", $lieu);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+public function filterMedicamentByTypeInList($selectedType, $medicaments) {
+    // Mettez en œuvre la logique pour filtrer les médicaments par type dans la liste existante
+    $filteredMedicaments = array();
+
+    foreach ($medicaments as $medicament) {
+        if ($medicament['type'] == $selectedType) {
+            $filteredMedicaments[] = $medicament;
+        }
+    }
+
+    return $filteredMedicaments;
+}
 
     
 }

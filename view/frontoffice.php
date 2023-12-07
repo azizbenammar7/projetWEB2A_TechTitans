@@ -122,27 +122,49 @@ include "../controller/typecontroller.php";
 
 $medicamentController = new MedicamentController();
 $typesController = new TypeController();
-$medicaments = $medicamentController->listMedicament();
+$articlesParPage = isset($_GET['articlesParPage']) ? (int)$_GET['articlesParPage'] : 4;
+
+// Récupérer tous les médicaments sous forme de tableau
+$medicaments = $medicamentController->listMedicament()->fetchAll(PDO::FETCH_ASSOC);
 $types = $typesController->listType();
 
-// Si une recherche par nom est effectuée
+// Appliquer les filtres de recherche
 if (isset($_GET['q']) && !empty($_GET['q'])) {
     $searchTerm = $_GET['q'];
     $medicaments = $medicamentController->searchMedicamentByName($searchTerm);
 }
 
-// Si un type est sélectionné dans le menu déroulant
+// Ne pas réinitialiser $medicaments à la liste complète ici
+// ...
+
 if (isset($_GET['type_medicament']) && !empty($_GET['type_medicament'])) {
     $selectedType = $_GET['type_medicament'];
     $medicaments = $medicamentController->filterMedicamentByType($selectedType);
 }
 
-// Si un lieu est sélectionné dans le menu déroulant
+// Ne pas réinitialiser $medicaments à la liste complète ici
+// ...
+
 if (isset($_GET['lieu']) && !empty($_GET['lieu'])) {
     $selectedLieu = $_GET['lieu'];
     $medicaments = $medicamentController->filterMedicamentByLieu($selectedLieu);
 }
+
+// Ne pas réinitialiser $medicaments à la liste complète ici
+// ...
+
+if (isset($_GET['q']) && !empty($_GET['q']) && isset($_GET['lieu']) && !empty($_GET['lieu'])) {
+    $searchTerm = $_GET['q'];
+    $selectedLieu = $_GET['lieu'];
+    $medicaments = $medicamentController->filterMedicamentByNameAndLieu($searchTerm, $selectedLieu);
+}
+
+// Pagination
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$startIndex = ($currentPage - 1) * $articlesParPage;
+$pagedMedicaments = array_slice($medicaments, $startIndex, $articlesParPage);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -151,106 +173,283 @@ if (isset($_GET['lieu']) && !empty($_GET['lieu'])) {
     <meta charset="utf-8">
     <title>Liste des médicaments</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <!-- Ajoutez les liens vers vos feuilles de style CSS ici -->
     <link href="votre_style.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #87CEEB;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-container select,
+        .form-container input {
+            height: 40px;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+
+        .form-container select {
+            flex-basis: calc(33.333% - 5px);
+        }
+
+        .form-container input {
+            flex-basis: calc(66.666% - 5px);
+        }
+
+        .form-container button {
+            height: 40px;
+            background-color: #87CEEB;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-container a {
+            height: 40px;
+            background-color: #87CEEB;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .results-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .result-item {
+            flex-basis: calc(25% - 20px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .result-item img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-item .result-info {
+            padding: 10px;
+        }
+
+        .result-item h5 {
+            margin: 0;
+        }
+
+        .result-item p {
+            margin: 5px 0;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            color: #fff;
+            padding: 10px;
+            text-decoration: none;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #87CEEB;
+        }
+
+        .pagination a:hover {
+            background-color: #6495ED;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .navigation a {
+            color: #fff;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #87CEEB;
+        }
+
+        .navigation a:hover {
+            background-color: #6495ED;
+        }
+    </style>
 </head>
 
 <body>
-    <center>
+    <div class="header">
         <h1>Liste des médicaments</h1>
-        <div class="container-xxl py-5">
-            <div class="container">
-                <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
-                    <div id="pharmacie_cadre">
-                        <form action="" method="GET" class="d-flex">
-                            <select name="filterBy" id="filterBy" class="form-select" style="height: 50px; font-size: 16px; margin-right: 5px;">
-                                <option value="" disabled selected>Choix</option>
-                                <option value="nom">Filtrer par nom</option>
-                                <option value="type_medicament">Filtrer par type</option>
-                                <option value="lieu">Filtrer par lieu</option>
-                            </select>
-                            <!-- Ajout des sections dynamiques -->
-                            <div id="searchSection" style="display: none;">
-                                <input type="text" id="searchInput" name="q" placeholder="Rechercher..." class="form-control" style="width: 400px; height: 40px; font-size: 16px; margin-right: 5px;">
-                            </div>
-                            <div id="typeSection" style="display: none;">
-                                <select name="type_medicament" id="type_medicament" class="form-select" style="height: 50px; font-size: 16px; margin-right: 5px;">
-                                    <option value="" disabled selected>Choix</option>
-                                    <?php foreach ($types as $type) : ?>
-                                        <option value="<?= $type['typ']; ?>"><?= $type['typ']; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div id="lieuSection" style="display: none;">
-                                <select name="lieu" id="lieu" class="form-select" style="height: 50px; font-size: 16px; margin-right: 5px;">
-                                    <option value="" disabled selected>Choix du lieu</option>
-                                    <?php
-                                    // Liste des lieux à afficher dans le menu déroulant
-                                    $lieux = ["Gbeli", "Gafsa", "Jandouba", "Bizerte", "Beja", "Kairouan", "Sidi Bouzid", "Sfax", "Gabes", "Medenine", "Monastir", "Sousse"];
-                                    foreach ($lieux as $lieu) : ?>
-                                        <option value="<?= $lieu; ?>"><?= $lieu; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <input type="submit" value="Rechercher" class="btn btn-primary" style="height: 40px; background-color: #87CEEB; margin-right: 5px;">
-                            <a href="frontoffice.php" class="btn btn-primary" style="height: 40px; background-color: #87CEEB;">Home</a>
-                        </form>
-                    </div>
-                </div>
+    </div>
+
+    <div class="container form-container">
+        <form action="" method="GET">
+            <div id="lieuSection">
+                <select name="lieu" id="lieu" class="form-select" style="height: 50px; font-size: 16px; margin-right: 5px;">
+                    <option value="" disabled selected>Choix du lieu</option>
+                    <?php
+                    // Liste des lieux à afficher dans le menu déroulant
+                    $lieux = ["Gbeli", "Gafsa", "Jandouba", "Bizerte", "Beja", "Kairouan", "Sidi Bouzid", "Sfax", "Gabes", "Medenine", "Monastir", "Sousse"];
+                    foreach ($lieux as $lieu) : ?>
+                        <option value="<?= $lieu; ?>" <?= (isset($_GET['lieu']) && $_GET['lieu'] == $lieu) ? 'selected' : '' ?>><?= $lieu; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-        </div>
-    </center>
-    <div class="row g-4">
-        <?php foreach ($medicaments as $medicament) : ?>
-            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="team-item position-relative rounded overflow-hidden" data-type="<?= strtolower($medicament['typ']); ?>">
-                    <div class="overflow-hidden">
-                        <!-- Afficher l'image du médicament -->
-                        <img class="img-fluid" src="<?= $medicament['piece_jointe']; ?>" alt="Image du médicament">
-                    </div>
-                    <div class="team-text bg-light text-center p-4">
-                        <!-- Afficher le nom du médicament sans le type -->
-                        <h5><?= $medicament['nom']; ?></h5>
 
-                        <!-- Condition pour changer la couleur en fonction de la disponibilité -->
-                        <?php if ($medicament['dispon'] === 'disponible') : ?>
-                            <p class="texte-vert"><?= $medicament['dispon']; ?></p>
-                        <?php else : ?>
-                            <p class="texte-rouge"><?= $medicament['dispon']; ?></p>
-                        <?php endif; ?>
+            <!-- Barre de type (affichée par défaut) -->
+            <div id="typeSection">
+                <select name="type_medicament" id="type_medicament">
+                    <option value="" disabled selected>Choix</option>
+                    <?php foreach ($types as $type) : ?>
+                        <option value="<?= $type['typ']; ?>" <?= (isset($_GET['type_medicament']) && $_GET['type_medicament'] == $type['typ']) ? 'selected' : '' ?>><?= $type['typ']; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                        <div class="team-social text-center">
-                            <!-- Bouton pour acheter -->
-                            <input class="favorite styled" type="button" value="Acheter" />
-                        </div>
-                    </div>
+            <!-- Barre de lieu (initialement cachée) -->
+            <div id="lieuSection" style="display: none;">
+                <select name="lieu" id="lieu">
+                    <option value="" disabled selected>Choix du lieu</option>
+                    <?php foreach ($lieux as $lieu) : ?>
+                        <option value="<?= $lieu; ?>" <?= (isset($_GET['lieu']) && $_GET['lieu'] == $lieu) ? 'selected' : '' ?>><?= $lieu; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Deuxième barre de choix (barre de recherche par nom) -->
+            <div style="flex-basis: 100%; margin-top: 10px;">
+                <input type="text" id="searchInput" name="q" placeholder="Rechercher par nom..." class="form-control" style="width: 100%;" value="<?= isset($_GET['q']) ? $_GET['q'] : '' ?>">
+            </div>
+
+            <button type="submit">Rechercher</button>
+            <a href="frontoffice.php">Home</a>
+        </form>
+    </div>
+
+    <div class="container results-container">
+        <?php foreach ($pagedMedicaments as $medicament) : ?>
+            <div class="result-item">
+                <img src="<?= $medicament['piece_jointe']; ?>" alt="Image du médicament">
+                <div class="result-info">
+                    <h5><?= $medicament['nom']; ?></h5>
+                    <?php if ($medicament['dispon'] === 'disponible') : ?>
+                        <p style="color: green;"><?= $medicament['dispon']; ?></p>
+                    <?php else : ?>
+                        <p style="color: red;"><?= $medicament['dispon']; ?></p>
+                    <?php endif; ?>
+                    <p>Lieu: <?= $medicament['lieu']; ?></p>
                 </div>
             </div>
         <?php endforeach; ?>
     </div>
+    
+    
 
+    <ul class="pagination">
+        <?php
+        $totalPages = ceil(count($medicaments) / $articlesParPage);
+
+        for ($i = 1; $i <= $totalPages; $i++) {
+            echo "<li><a href='frontoffice.php?page=$i&articlesParPage=$articlesParPage'>$i</a></li>";
+        }
+        ?>
+    </ul>
+
+    <div class="navigation">
+        <a href='frontoffice.php?page=1&articlesParPage=<?= $articlesParPage; ?>'>&lt;&lt; Première page</a>
+        <?php
+        if ($currentPage > 1) {
+            $prevPage = $currentPage - 1;
+            echo "<a href='frontoffice.php?page=$prevPage&articlesParPage=$articlesParPage'>&lt; Page précédente</a>";
+        }
+        ?>
+        <?php
+        if ($currentPage < $totalPages) {
+            $nextPage = $currentPage + 1;
+            echo "<a href='frontoffice.php?page=$nextPage&articlesParPage=$articlesParPage'>Page suivante &gt;</a>";
+        }
+        ?>
+        <a href='frontoffice.php?page=<?= $totalPages; ?>&articlesParPage=<?= $articlesParPage; ?>'>Dernière page &gt;&gt;</a>
+    </div>
+
+    <!-- Ajoutez vos scripts JavaScript ici -->
     <script>
-        document.getElementById('filterBy').addEventListener('change', function () {
-            var selectedFilter = this.value;
+        document.addEventListener("DOMContentLoaded", function () {
+            var filterBy1 = document.getElementById("filterBy1");
+            var typeSection = document.getElementById("typeSection");
+            var lieuSection = document.getElementById("lieuSection");
 
-            // Masquer toutes les sections
-            document.getElementById('searchSection').style.display = 'none';
-            document.getElementById('typeSection').style.display = 'none';
-            document.getElementById('lieuSection').style.display = 'none';
+            filterBy1.addEventListener("change", function () {
+                typeSection.style.display = "none";
+                lieuSection.style.display = "none";
 
-            // Afficher la section appropriée en fonction de la sélection
-            if (selectedFilter === 'nom') {
-                document.getElementById('searchSection').style.display = 'block';
-            } else if (selectedFilter === 'type_medicament') {
-                document.getElementById('typeSection').style.display = 'block';
-            } else if (selectedFilter === 'lieu') {
-                document.getElementById('lieuSection').style.display = 'block';
-            }
+                if (filterBy1.value === "type_medicament") {
+                    typeSection.style.display = "block";
+                } else if (filterBy1.value === "lieu") {
+                    lieuSection.style.display = "block";
+                }
+            });
         });
     </script>
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
