@@ -78,8 +78,9 @@ font-size: 16px;"> Last access : 30 May 2014 &nbsp; <a href="#" class="btn btn-d
                  
                  <hr />
 
-<?php
+                 <?php
 include "../controller/reponse.php";
+
 // Initialiser les compteurs pour les trois types de satisfaction
 $nonSatisfaisanteCount = 0;
 $moyennementSatisfaisanteCount = 0;
@@ -96,13 +97,19 @@ $idReclamation = $_GET['idReclamation'] ?? null;
 if ($idReclamation !== null) {
     // Récupérer les réponses liées à la réclamation spécifiée
     $reponses = $reponseController->getReponsesByReclamation($idReclamation);
+
+    // Ajouter des informations à la session (par exemple, la satisfaction)
+    $_SESSION['satisfaction'] = $votreDonneeDeSatisfaction;
+
+    // Sauvegarder les informations de session
+    session_write_close();
 } else {
     // Rediriger si l'ID de la réclamation n'est pas spécifié
     header('Location: listreponse.php');
     exit();
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -204,3 +211,4 @@ if ($idReclamation !== null) {
 </body>
 
 </html>
+
