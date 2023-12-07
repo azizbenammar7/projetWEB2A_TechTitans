@@ -32,9 +32,52 @@ try {
 
         $to = $email;
         $subject = "Password Reset";
-        $message = "Click http://localhost/proj_Dia%20-%20Copie%20-%20Copie%20-%20Copie%20-%20Copie/views/reset-password.php?token=$token to reset your password.";
+        $styles = '
+        <style>
+        @font-face {
+            font-family: "Poppins";
+            src: url("views/font/poppins-bold-webfont.woff2") format("woff2");
+            font-weight: bold;
+        }
+        
+        body {
+                font-family: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
+                background-color: #f4f4f4;
+                color: #333;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .reset-link {
+                color: #007bff;
+                text-decoration: none;
+            }
+        </style>
+    ';
+
+    // Email body with inline CSS
+    $message = "
+        <html>
+        <head>
+            <title>Password Reset</title>
+            <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'>
+
+            {$styles}
+        </head>
+        <body>
+            <div class='container'>
+                <p>Click <a href='http://localhost/proj_Dia%20-%20Copie%20-%20Copie%20-%20Copie%20-%20Copie/views/reset-password.php?token={$token}' class='reset-link'>here</a> to reset your password.</p>
+            </div>
+        </body>
+        </html>
+    ";
         $headers = "From: noreply@example.com\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
 
         if (mail($to, $subject, $message, $headers)) {
             echo "Message envoyé, veuillez vérifier votre boîte de réception.";

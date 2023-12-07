@@ -22,7 +22,9 @@ if (
     isset($_POST["tel"]) &&
     isset($_POST["role_user"]) &&
     isset($_POST["typeDiabete"]) &&
-    isset($_POST["ville"])
+    isset($_POST["ville"])&&
+    isset($_POST["motdepasse"])  
+
 ) {
     // Vérifiez si des champs obligatoires sont vides
     if (
@@ -32,7 +34,9 @@ if (
         !empty($_POST["tel"]) &&
         !empty($_POST["role_user"]) &&
         !empty($_POST["typeDiabete"]) &&
-        !empty($_POST["ville"])
+        !empty($_POST["ville"])&&
+        $motdepasse = md5($_POST['motdepasse'])// Hasher le mot de passe
+
     ) {
         // Récupérez les valeurs du formulaire
         $idUser = $_POST['idUser']; // Garder l'ID d'origine
@@ -43,8 +47,16 @@ if (
         $roleUser = $_POST['role_user'];
         $typeDiabete = $_POST['typeDiabete'];
         $ville = $_POST['ville'];
-        $motdepasse = isset($_POST['motdepasse']) ? md5($_POST['motdepasse']) : null;
+        $motdepasse = isset($_POST['motdepasse']) ? $_POST['motdepasse'] : null;
 
+        // Vérifiez si le champ du mot de passe est renseigné
+        if (empty($motdepasse)) {
+            // Si le champ du mot de passe est vide, définissez une erreur
+            $error = "Veuillez saisir un mot de passe.";
+        } else {
+            // Utilisez md5 pour hasher le mot de passe
+            $motdepasse = md5($motdepasse);
+        }
 
         // Vérifiez si une nouvelle pièce jointe a été fournie
         $newDiplome = null;
@@ -58,6 +70,19 @@ if (
                 $error = "Erreur lors de l'upload du nouveau diplôme.";
             }
         }
+        // Vérifiez si une nouvelle photo de profil a été fournie
+$newPdp = null;
+if ($_FILES['new_pdp']['error'] == UPLOAD_ERR_OK) {
+    $uploadDir = 'uploads/';
+    $uploadFile = $uploadDir . basename($_FILES['new_pdp']['name']);
+
+    if (move_uploaded_file($_FILES['new_pdp']['tmp_name'], $uploadFile)) {
+        $newPdp = $uploadFile;
+    } else {
+        $error = "Erreur lors de l'upload de la nouvelle photo de profil.";
+    }
+}
+
 
         // Créez une instance de la classe User
         $user = new User(
@@ -70,7 +95,8 @@ if (
             $typeDiabete,
             $ville,
             $newDiplome,
-            $motdepasse
+            $motdepasse,
+            $newPdp
         );
 
         // Utilisez le contrôleur pour mettre à jour l'utilisateur
@@ -187,7 +213,11 @@ form.addEventListener("submit", function (event) {
         isValid = false;
         alert("Le numéro de téléphone doit contenir exactement 8 chiffres.");
     }
-
+    var motdepasseInput = document.getElementById("motdepasse");
+    if (!motdepasseInput.value.trim()) {
+        isValid = false;
+        alert("Veuillez saisir un mot de passe.");
+    }
     if (!isValid) {
         event.preventDefault(); // Empêcher la soumission du formulaire si la validation échoue
     }
@@ -312,15 +342,20 @@ form.addEventListener("submit", function (event) {
                         <span id="erreurNewDiplome" style="color: red"></span>
                     </td>
                 </tr>
+                <tr>
+    <td><label for="new_pdp">Nouvelle Photo de Profil :</label></td>
+    <td>
+        <input type="file" id="new_pdp" name="new_pdp" accept="image/*" />
+        <span id="erreurNewPdp" style="color: red"></span>
+    </td>
+</tr>
                 
                 <tr>
                 
                     <td>
                         <input type="submit" value="Save" class="btn">
                     </td>
-                    <td>
-                        <input type="reset" value="Reset" class="btn">
-                    </td>
+                 
                 </tr>
             </table>
         </form>
