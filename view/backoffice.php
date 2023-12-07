@@ -6,6 +6,14 @@ $pubC = new pubC();
 // Default: list all publications
 $publications = $pubC->listPublications();
 
+// Pagination
+$itemsPerPage = 10; // Number of items to display per page
+$totalPublications = count($publications);
+$totalPages = ceil($totalPublications / $itemsPerPage);
+$currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+$offset = ($currentPage - 1) * $itemsPerPage;
+$publications = array_slice($publications, $offset, $itemsPerPage);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Filter by date if the date filter is set
     if (isset($_POST["datePubFilter"])) {
@@ -201,6 +209,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 <!-- END TABLE -->
+<div class="row">
+        <div class="col-md-12">
+            <ul class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                    <li class="<?= $i == $currentPage ? 'active' : ''; ?>">
+                        <a href="backoffice.php?page=<?= $i; ?>"><?= $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+            </ul>
+        </div>
+    </div>
 
             </div>
         </div>

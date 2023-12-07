@@ -12,17 +12,18 @@ class PubC
     }
 
     public function listPublications()
-    {
-        $sql = "SELECT * FROM publication"; 
-        $db = Config::getConnexion(); 
-        try {
-            $liste = $db->query($sql);
-            //$liste = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-            return $liste;
-        } catch (Exception $e) {
-            die('Error:' . $e->getMessage());
-        }
+{
+    $sql = "SELECT * FROM publication";
+    $db = Config::getConnexion();
+    
+    try {
+        $stmt = $db->query($sql);
+        $liste = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $liste;
+    } catch (Exception $e) {
+        die('Error:' . $e->getMessage());
     }
+}
 
     public function deletePublication($IDpublication)
     {
