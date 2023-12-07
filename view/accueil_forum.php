@@ -318,6 +318,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <!-- Comment section (initially hidden) -->
                                             <div class="comment-section" id="comment-section-<?= $publication['IDpub']; ?>" style="display: none;">
                                                 <textarea rows="4" cols="50" placeholder="Write your comment" id="comment-text-<?= $publication['IDpub']; ?>"></textarea>
+                                                <div id="bad-word-message-<?= $publication['IDpub']; ?>" class="bad-word-message" style="color: red;"></div>
                                                 <button class="submit-comment" data-publication-id="<?= $publication['IDpub']; ?>">Submit</button>
                                             </div>
                                         </li>
@@ -353,6 +354,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         var submitCommentButtons = document.querySelectorAll(".submit-comment");
         submitCommentButtons.forEach(function (button) {
             button.addEventListener("click", function (event) {
+                console.log("hey")
                 event.preventDefault();
                 var publicationId = this.getAttribute("data-publication-id");
                 submitComment(publicationId);
@@ -368,7 +370,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 handleLikeDislike(publicationId, 'like');
             });
         });
-
+        
         // Add event listeners to dislike buttons
         var dislikeButtons = document.querySelectorAll(".dislike-btn");
         dislikeButtons.forEach(function (button) {
@@ -384,38 +386,71 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             var commentSection = document.getElementById("comment-section-" + publicationId);
             commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
         }
-        
-        // Function to handle comment submission using AJAX
-        function submitComment(publicationId) {
-            var commentText = document.getElementById("comment-text-" + publicationId).value;
-            toggleCommentSection(publicationId)       
-            // Create a new FormData object to send data to the server
-            var formData = new FormData();
-            formData.append('text_of_commentaire', commentText);
-            formData.append('publication', publicationId);
+        async function censorText(text) {
+  const url = 'https://neutrinoapi-bad-word-filter.p.rapidapi.com/bad-word-filter';
+  const options = {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'X-RapidAPI-Key': '39a6765db3mshbd64869623b1471p152334jsn16ba0c85fb16',
+      'X-RapidAPI-Host': 'neutrinoapi-bad-word-filter.p.rapidapi.com'
+    },
+    body: new URLSearchParams({
+      content: text,
+      'censor-character': '*'
+    })
+  };
 
-            // Use fetch API to send data to the server
-            fetch('addcommentaire.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json();
+    return result; // Return the response
+  } catch (error) {
+    console.error(error);
+    return null; // Return null in case of an error
+  }
+}
 
-                // Check if the server response contains a "message" property
-                if (data.message === "Comment submitted successfully") {
-                    // Comment submitted successfully, add it to the list
-                    updateCommentList(); // Call the function to update the comment list
-                } else {
-                    // Handle the case where the server response indicates an error
-                    console.error('Error:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+// Function to handle comment submission using AJAX
+// Function to handle comment submission using AJAX
+async function submitComment(publicationId) {
+  var commentText = document.getElementById("comment-text-" + publicationId).value;
+  var badWordMessage = document.getElementById("bad-word-message-" + publicationId);
+
+  // Check if bad words are present
+  const hasBadWords = await censorText(commentText);
+  if (hasBadWords['is-bad']) {
+    console.log('Bad words detected. Comment not submitted.');
+    badWordMessage.innerText = 'Your comment contains inappropriate language.';
+    document.getElementById("comment-text-" + publicationId).innerText='';
+    return;
+  }
+  // Clear the bad word message if there are no bad words
+  badWordMessage.innerText = '';
+
+  toggleCommentSection(publicationId);
+  var formData = new FormData();
+  formData.append('text_of_commentaire', commentText);
+  formData.append('publication', publicationId);
+
+  // Use fetch API to send data to the server
+  fetch('addcommentaire.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    if (data.message === "Comment submitted successfully") {
+      updateCommentList();
+    } else {
+      console.error('Error:', data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
 
         // Function to handle like/dislike actions using AJAX
         function handleLikeDislike(publicationId, action) {
@@ -468,7 +503,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             });
         }
 
-
+        
     });
 </script>
 

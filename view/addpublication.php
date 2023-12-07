@@ -138,8 +138,6 @@ ob_end_flush();
                                 <div class="col-12">
                                     <button class="btn btn-primary w-100 py-3" type="reset">Reset</button>
                                 </div>
-                                
-                               
                             </div>
                         </form>
                     </div>
