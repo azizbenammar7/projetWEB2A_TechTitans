@@ -4,6 +4,17 @@ include '../model/reponse.php';
 include '../controller/reponse.php';
 include '../controller/reclamation.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+
 $error = "";
 $reclamationController = new ReclamationController();
 
@@ -21,34 +32,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (empty($description)) {
     $error = "Veuillez remplir tous les champs.";
 } else {
+    
     try {
-        // Créer une instance de Reponse
-        $reponse = new Reponse(
-            $description,
-            (int)$etat,
-            (int)$reclamation
-        );
+            $id=$_POST['id'];
+            // Envoyer un e-mail de confirmation
+            $mail = new PHPMailer(true);
+            //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';                // Définir le serveur SMTP Gmail
+            $mail->SMTPAuth = true;
+            $mail->Username = 'calfados22@gmail.com';
+            $mail->Password = 'gryztkkxaxvszbos';
+            $mail->SMTPSecure = 'ssl';            //Enable implicit TLS encryption
+            $mail->Port = 465;                                    //TCP port to connect to; use 587 if you have set SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS
 
-        // Ajouter la réponse à la base de données
-        $reponseController = new ReponseController();
-        $idReponse = $reponseController->addReponse($reponse);
 
-        // Envoi d'un email
-// Exemple d'utilisation
-$emailSender = new EmailSender();
-$textContent = 'Contenu du message...';
-$recipientEmail = 'mellouli.youssef11@gmail.com';
+            $mail->setFrom('calfados22@gmail.com', 'karim');
+            $mail->addAddress('mellouli.youssef11@gmail.com'); // Adresse e-mail de l'utilisateur
 
-$emailSender->sendEmail($textContent, $recipientEmail);
-        
-        exit();
-    } catch (Exception $e) {
-        // Gestion de l'erreur
-        $error = "Erreur lors de l'ajout de la réponse : " . $e->getMessage();
+            $mail->Subject = 'Confirmation de reponse';
+            $mail->Body = "On a ajouté une réponse pour ce ID de votre réclamation: $id\n";
+
+
+            $mail->send();
+
+            header('Location: listreponse.php');
+            //exit();
+           // Créer une instance de Reponse
+    $reponse = new Reponse(
+        $description,
+        (int)$etat,
+        (int)$reclamation
+    );
+
+    $reponseController = new ReponseController();
+    $idReponse = $reponseController->addReponse($reponse);
+
+        } catch (Exception $e) {
+            $erreur = 'Erreur lors de l\'ajout de l\'abonnement : ' . $e->getMessage();
+            $mail->SMTPDebug = 2; // Active le débogage SMTP détaillé
+            $mail->Debugoutput = 'html'; // Affiche les informations de débogage dans le format HTML
+        }
     }
 }
-}
-
 // Mettre à jour l'état de la réclamation en fonction du nombre de réponses
 //$nouvelEtat = $reclamationController->updateEtatIfResponsesExist($reclamation);
 $etatReclamation = $reclamationController->getEtatReclamation($reclamation);
