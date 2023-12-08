@@ -173,5 +173,6 @@ class User
         $this->accountActivationHash = $accountActivationHash;
         return $this;
     }
+    
 }
 

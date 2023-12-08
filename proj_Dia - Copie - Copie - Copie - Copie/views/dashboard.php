@@ -202,6 +202,7 @@ session_start();
         </ul>
         <a class="btn" href="logout.php">Se déconnecter</a>
         <a class="btn" href="updateuser1.php">Mettre à jour profil</a>
+ 
 
     </div>
 </div>

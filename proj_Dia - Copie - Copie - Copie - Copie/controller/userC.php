@@ -271,4 +271,6 @@ public function isAccountActivated($email) {
 
     return empty($result['account_activation_hash']);
 }
+
+
 }
