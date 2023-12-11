@@ -258,6 +258,24 @@ public function filterMedicamentByTypeInList($selectedType, $medicaments) {
 
     return $filteredMedicaments;
 }
+// Dans la classe MedicamentController
+public function checkAvailabilityInOtherPlaces($medicamentName, $currentLieu)
+{
+    // Votre logique pour vérifier la disponibilité du médicament dans d'autres lieux
+    // Retourne true si le médicament est disponible ailleurs, sinon retourne false
+    // Vous devrez adapter cela à votre logique et à votre structure de base de données
+
+    // Exemple simplifié :
+    $query = "SELECT COUNT(*) AS count FROM medicaments WHERE nom = :nom AND lieu != :currentLieu AND dispon = 'disponible'";
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(':nom', $medicamentName, PDO::PARAM_STR);
+    $stmt->bindParam(':currentLieu', $currentLieu, PDO::PARAM_STR);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $result['count'] > 0;
+}
+
 
     
 }
